@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:amqp="http://java.sun.com/xml/ns/j2ee"
+      xmlns:spring="http://www.springframework.org/schema/beans"
+      xmlns="http://www.mulesoft.org/schema/mule/core" xsi:schemaLocation=
+              "http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+">
+    <spring:beans>
+        <spring:bean id="gotEvent" scope="singleton" class="comm.GotEvent"></spring:bean>
+    </spring:beans>
+    <amqp:connector name="amqpAutoAckLocalhostConnector"
+                    virtualHost="/"
+                    username="hello"
+                    password="world"
+                    activeDeclarationsOnly="true"/>
+
+    <flow name="rabbitmqinboundintegration">
+        <amqp:inbound-endpoint exchangeName="fromBrokerExchange"
+                               exchangeType="topic"
+                               exchangeAutoDelete="false"
+                               exchangeDurable="true"
+                               queueName="mq_to_esb_queue"
+                               queueDurable="true"
+                               queueExclusive="false"
+                               queueAutoDelete="true"
+                               connector-ref="amqpAutoAckLocalhostConnector"/>
+        <component>
+            <spring-object bean="gotEvent"></spring-object>
+        </component>
+    </flow>
+</mule>

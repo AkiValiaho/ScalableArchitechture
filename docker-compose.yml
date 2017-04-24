@@ -1,0 +1,22 @@
+version: "3"
+services:
+  rabbitmq:
+    build: rabbitmq
+    env_file:
+     - rabbitmq/rabbitmq-variables.env
+    ports:
+      - 8056:15672
+      - 5672:5672
+  mulebroker:
+    build: mulebroker 
+    ports:
+      - 8888:8888
+  scalablegateway:
+    build: scalablegateway
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    restart: always
+    ports:
+      - 8080:8080
