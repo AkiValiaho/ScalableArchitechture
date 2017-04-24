@@ -1,7 +1,6 @@
 package com.akivaliaho.event;
 
 import org.springframework.stereotype.Component;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.annotation.PostConstruct;
 
@@ -16,7 +15,6 @@ public class LocalEventDelegator {
     }
 
     public void delegateEvent(ServiceEvent foo) {
-        throw new NotImplementedException();
-        //TODO Do Test
+        //TODO Delegate event to proper event handler
     }
 }

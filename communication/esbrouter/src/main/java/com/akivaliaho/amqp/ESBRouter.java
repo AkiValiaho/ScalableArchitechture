@@ -107,8 +107,8 @@ public class ESBRouter {
 
     public <V> V routeEvent(ServiceEvent event) {
         //Send message to an exchange which routes it to the camel esb
-        log.info("Routing event to ESB");
-        this.template.convertAndSend(mq_from_esb_exchange.getName(), routingKey, event);
+        log.info("Routing event to the master ESB");
+        this.template.convertAndSend(mq_to_esb_exchange.getName(), "master", event);
         return null;
     }
 }
