@@ -1,0 +1,43 @@
+package com.akivaliaho.event;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+
+/**
+ * Created by vagrant on 4/5/17.
+ */
+@NoArgsConstructor
+public class ServiceEvent implements Serializable {
+    @Getter
+    private Long id;
+    @Getter
+    private String eventName;
+    @Getter
+    private Object[] parameters;
+
+    public ServiceEvent(ServiceEvent event) {
+        this.id = event.getId();
+        this.eventName = event.getEventName();
+        this.parameters = event.getParameters();
+    }
+
+    public void saveEvent(String eventName, Object... params) {
+        this.eventName = eventName;
+        this.parameters = params;
+    }
+
+    public EventParams getEventParams() {
+        return new EventParams(eventName, parameters);
+    }
+
+    @AllArgsConstructor
+    class EventParams {
+        @Getter
+        String eventName;
+        @Getter
+        Object[] params;
+    }
+}

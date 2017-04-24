@@ -1,5 +1,6 @@
 package com.akivaliaho;
 
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 
 /**
@@ -7,23 +8,23 @@ import org.apache.camel.builder.RouteBuilder;
  */
 public class FromMQRouteBuilder extends RouteBuilder {
 
+    private final ExchangeToServiceEvent exchangeToServiceEvent;
+
+    public FromMQRouteBuilder() {
+        ProducerTemplate producerTemplate = getContext().createProducerTemplate();
+        this.exchangeToServiceEvent = new ExchangeToServiceEvent(producerTemplate);
+    }
+
     /**
      * Let's configure the Camel routing rules using Java code...
      */
     public void configure() {
-
-        from("rabbitmq://localhost/")
-        // here is a sample which processes the input files
-        // (leaving them in place - see the 'noop' flag)
-        // then performs content based routing on the message using XPath
-        from("file:src/data?cdnoop=true")
-                .choice()
-                .when(xpath("/person/city = 'London'"))
-                .log("UK message")
-                .to("file:target/messages/uk")
-                .otherwise()
-                .log("Other message")
-                .to("file:target/messages/others");
+        from("rabbitmq://localhost:5672/toBrokerExchange?routingKey=master&username=hello&password=world&exchangeType=topic&autoDelete=false")
+                .process(exchangeToServiceEvent);
+        //TODO Check if this works properly
+        from("direct:fromESB")
+                .to("rabbitmq://localhost:5672/fromBrokerExchange?routingKey=${in.headers.routingKey}");
     }
+
 
 }

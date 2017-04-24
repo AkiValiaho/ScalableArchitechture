@@ -7,10 +7,10 @@ services:
     ports:
       - 8056:15672
       - 5672:5672
-  mulebroker:
-    build: mulebroker 
-    ports:
-      - 8888:8888
+  camel:
+    build: camel
+    depends_on:
+      - scalablegateway
   scalablegateway:
     build: scalablegateway
     links:
