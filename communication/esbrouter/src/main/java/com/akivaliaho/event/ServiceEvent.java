@@ -3,6 +3,7 @@ package com.akivaliaho.event;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -14,34 +15,40 @@ import java.io.Serializable;
 @Entity
 @NoArgsConstructor
 public class ServiceEvent implements Serializable {
-    @Id
-    @Getter
-    private Long id;
-    @Getter
-    private String eventName;
-    @Getter
-    private Object[] parameters;
+	@Id
+	@Getter
+	@Setter
+	private Long id;
+	@Getter
+	@Setter
+	private String eventName;
+	@Getter
+	private Object[] parameters;
 
-    public ServiceEvent(ServiceEvent event) {
-        this.id = event.getId();
-        this.eventName = event.getEventName();
-        this.parameters = event.getParameters();
-    }
+	public ServiceEvent(String eventName) {
+		this.eventName = eventName;
+	}
 
-    public void saveEvent(String eventName, Object... params) {
-        this.eventName = eventName;
-        this.parameters = params;
-    }
+	public ServiceEvent(ServiceEvent event) {
+		this.id = event.getId();
+		this.eventName = event.getEventName();
+		this.parameters = event.getParameters();
+	}
 
-    public EventParams getEventParams() {
-        return new EventParams(eventName, parameters);
-    }
+	public void saveEvent(String eventName, Object... params) {
+		this.eventName = eventName;
+		this.parameters = params;
+	}
 
-    @AllArgsConstructor
-    class EventParams {
-        @Getter
-        String eventName;
-        @Getter
-        Object[] params;
-    }
+	public EventParams getEventParams() {
+		return new EventParams(eventName, parameters);
+	}
+
+	@AllArgsConstructor
+	class EventParams {
+		@Getter
+		String eventName;
+		@Getter
+		Object[] params;
+	}
 }

@@ -6,19 +6,14 @@
         <groupId>com.akivaliaho</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>camel</artifactId>
     <packaging>jar</packaging>
-
     <name>A Camel Route</name>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <!-- Camel BOM -->
@@ -31,7 +26,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -62,7 +56,6 @@
             <artifactId>log4j-slf4j-impl</artifactId>
             <scope>runtime</scope>
         </dependency>
-
         <!-- testing -->
         <dependency>
             <groupId>org.apache.camel</groupId>

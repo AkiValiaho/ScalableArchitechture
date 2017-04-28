@@ -16,8 +16,6 @@
         </module>
         <module>calculatorservice</module>
         <module>communication</module>
-        <module>mule</module>
-        <module>mule</module>
         <module>camel</module>
     </modules>
 </project>
