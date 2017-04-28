@@ -8,7 +8,7 @@ import com.akivaliaho.config.annotations.Interests;
  */
 @Interests(
 		interests = {
-				@Interest(value = "doSuperHardCalculation")
+				@Interest(value = "com.akivaliaho.service.events.CalculateSuperHardSumEvent")
 		}
 )
 public class EventConf {

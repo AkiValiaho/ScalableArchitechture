@@ -7,6 +7,7 @@ import com.akivaliaho.event.LocalEventDelegator;
 import com.akivaliaho.event.ServiceEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -32,7 +33,7 @@ public class ESBRouter {
 	private String serviceName;
 	private RabbitTemplate template;
 	private String routingKey;
-	private TopicExchange mq_from_esb_exchange;
+	private FanoutExchange mq_from_esb_exchange;
 	private TopicExchange mq_to_esb_exchange;
 
 	@Autowired
@@ -55,7 +56,7 @@ public class ESBRouter {
 		Queue serviceQueue = new Queue(messagingConfiguration.get(ConfigEnum.SERVICEQUEUE));
 		admin.declareQueue(serviceQueue);
 		Queue toESBQueue = new Queue(messagingConfiguration.get(ConfigEnum.MQ_TO_ESB_QUEUE));
-		mq_from_esb_exchange = new TopicExchange(messagingConfiguration.get(ConfigEnum.MQ_FROM_ESB_ESCHANGE), true, false);
+		mq_from_esb_exchange = new FanoutExchange(messagingConfiguration.get(ConfigEnum.MQ_FROM_ESB_ESCHANGE), true, false);
 		mq_to_esb_exchange = new TopicExchange(messagingConfiguration.get(ConfigEnum.MQ_TO_ESB_EXCHANGE), true, false);
 		bindingsInit(messagingConfiguration, admin, serviceQueue, toESBQueue);
 		messageContainerInit(connectionFactory, serviceQueue);
@@ -68,7 +69,7 @@ public class ESBRouter {
 		InterestEvent event = new InterestEvent(configurationHolder.getInterests()
 				.stream()
 				.map(s -> new ServiceEvent(s))
-				.collect(Collectors.toList()), configurationHolder.getMessagingConfiguration().get(ConfigEnum.SERVICEBASENAME));
+				.collect(Collectors.toList()), configurationHolder.getMessagingConfiguration().get(ConfigEnum.MQ_FROM_ESB_ESCHANGE));
 		routeEvent(new ServiceEvent(event));
 	}
 
@@ -99,12 +100,12 @@ public class ESBRouter {
 		container.start();
 	}
 
-	private void declareBindings(RabbitAdmin admin, Queue service_queue, TopicExchange mq_from_esb_exchange) {
+	private void declareBindings(RabbitAdmin admin, Queue service_queue, FanoutExchange mq_from_esb_exchange) {
 		admin.declareBinding(
-				BindingBuilder.bind(service_queue).to(mq_from_esb_exchange).with(routingKey));
+				BindingBuilder.bind(service_queue).to(mq_from_esb_exchange));
 	}
 
-	private void declare(RabbitAdmin admin, Queue fromBrokerQueue, Queue toBrokerQueue, TopicExchange masterBrokerIncomingExchange, TopicExchange masterBrokerOutboundExchange) {
+	private void declare(RabbitAdmin admin, Queue fromBrokerQueue, Queue toBrokerQueue, FanoutExchange masterBrokerIncomingExchange, TopicExchange masterBrokerOutboundExchange) {
 		admin.declareExchange(masterBrokerIncomingExchange);
 		admin.declareExchange(masterBrokerOutboundExchange);
 		admin.declareQueue(toBrokerQueue);

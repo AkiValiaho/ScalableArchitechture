@@ -31,9 +31,22 @@ public class ServiceEvent implements Serializable {
 		this.parameters = event.getParameters();
 	}
 
+	@Override
+	public int hashCode() {
+		return 31 * eventName.hashCode();
+	}
+
 	public void saveEvent(String eventName, Object... params) {
 		this.eventName = eventName;
 		this.parameters = params;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof ServiceEvent) {
+			return obj.hashCode() == this.hashCode();
+		}
+		return false;
 	}
 
 	public EventParams getEventParams() {

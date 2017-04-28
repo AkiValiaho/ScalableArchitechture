@@ -1,7 +1,6 @@
 package com.akivaliaho;
 
 import com.akivaliaho.event.EventInterestHolder;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 
 /**
@@ -9,12 +8,11 @@ import org.apache.camel.builder.RouteBuilder;
  */
 public class FromMQRouteBuilder extends RouteBuilder {
 
-	private final ExchangeToServiceEvent exchangeToServiceEvent;
+	private ExchangeToServiceEvent exchangeToServiceEvent;
 
 	public FromMQRouteBuilder() {
-		ProducerTemplate producerTemplate = getContext().createProducerTemplate();
 		EventInterestHolder eventInterestHolder = new EventInterestHolder();
-		this.exchangeToServiceEvent = new ExchangeToServiceEvent(producerTemplate, eventInterestHolder);
+		this.exchangeToServiceEvent = new ExchangeToServiceEvent(eventInterestHolder);
 	}
 
 	/**
@@ -25,7 +23,8 @@ public class FromMQRouteBuilder extends RouteBuilder {
 				.process(exchangeToServiceEvent);
 		//TODO Check if this works properly
 		from("direct:fromESB")
-				.to("rabbitmq://localhost:5672/fromBrokerExchange?routingKey=${in.headers.routingKey}&username=hello&password=world&exchangeType=topic&autoDelete=false");
+				.log("Attempting to send to exchange with routing key: ${in.headers.routingKey}")
+				.dynamicRouter(method(ESBDynamicRouter.class, "routeExchange"));
 	}
 
 

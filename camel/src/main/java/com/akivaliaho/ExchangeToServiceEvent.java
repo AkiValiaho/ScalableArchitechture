@@ -1,15 +1,12 @@
 package com.akivaliaho;
 
 import com.akivaliaho.event.EventInterestHolder;
-import com.akivaliaho.event.InterestedParty;
 import com.akivaliaho.event.ServiceEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.ProducerTemplate;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -17,11 +14,9 @@ import java.util.List;
  */
 @Slf4j
 public class ExchangeToServiceEvent implements Processor {
-	private final ProducerTemplate producerTemplate;
 	private final EventInterestHolder eventInterestHolder;
 
-	public ExchangeToServiceEvent(ProducerTemplate producerTemplate, EventInterestHolder eventInterestHolder) {
-		this.producerTemplate = producerTemplate;
+	public ExchangeToServiceEvent(EventInterestHolder eventInterestHolder) {
 		this.eventInterestHolder = eventInterestHolder;
 	}
 
@@ -35,15 +30,24 @@ public class ExchangeToServiceEvent implements Processor {
 			eventInterestHolder.registerInterests(serviceEvent);
 		}
 		//TODO Pickup the listeners of this particular event before sending it back to the broker
-		List<InterestedParty> interestedParties = eventInterestHolder.getInterestedParties(serviceEvent);
+		List<String> interestedParties = eventInterestHolder.getInterestedParties(serviceEvent);
 		if (interestedParties != null) {
 			interestedParties
-					.parallelStream()
+
 					.forEach(event -> {
 						//Send all the events through the producer template
-						exchange.getIn().setBody(serviceEvent);
-						exchange.getIn().setHeader("routingKey", event.getRoutingKey());
-						producerTemplate.send("direct:fromESB", exchange);
+						try {
+							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+							ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+							objectOutputStream.writeObject(serviceEvent);
+							objectOutputStream.flush();
+							byte[] bytes = byteArrayOutputStream.toByteArray();
+							exchange.getIn().setBody(bytes);
+							exchange.getIn().setHeader("routingKey", event);
+							exchange.getContext().createProducerTemplate().send("direct:fromESB", exchange);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					});
 		}
 	}
