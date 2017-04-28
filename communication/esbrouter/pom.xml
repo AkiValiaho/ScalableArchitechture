@@ -23,6 +23,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.jmockit/jmockit -->
         <dependency>
             <groupId>org.jmockit</groupId>
