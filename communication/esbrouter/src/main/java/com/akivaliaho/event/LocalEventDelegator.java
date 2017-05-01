@@ -2,19 +2,23 @@ package com.akivaliaho.event;
 
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * Created by akivv on 23.4.2017.
  */
 @Component
 public class LocalEventDelegator {
-    @PostConstruct
-    public void init() {
-        //TODO Search through the classpath for an event handler to invoke
-    }
+    private Map<String, Method> interestMap;
+
 
     public void delegateEvent(ServiceEvent foo) {
+        Method method = interestMap.get(foo.getEventName());
         //TODO Delegate event to proper event handler
+    }
+
+    public void pluginInterests(Map<String, Method> interestMap) {
+        this.interestMap = interestMap;
     }
 }

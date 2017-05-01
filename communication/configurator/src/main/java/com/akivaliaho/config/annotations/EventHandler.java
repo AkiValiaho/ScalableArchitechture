@@ -6,10 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by vagrant on 4/28/17.
+ * Created by akivv on 1.5.2017.
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Interests {
-	Interest[] interests() default {};
+public @interface EventHandler {
 }
