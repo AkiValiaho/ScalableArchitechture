@@ -13,19 +13,19 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class AsyncWrapper {
-    public <T> DeferredResult<T> wrapAsDeferredResult(ListenableFuture<T> integerFuture) {
-        DeferredResult<T> tDeferredResult = new DeferredResult<>(TimeUnit.SECONDS.convert(5, TimeUnit.MILLISECONDS));
-        integerFuture.addCallback(new ListenableFutureCallback<T>() {
-            @Override
-            public void onFailure(Throwable throwable) {
-                tDeferredResult.setErrorResult(throwable);
-            }
+	public <T> DeferredResult<T> wrapAsDeferredResult(ListenableFuture<T> integerFuture) {
+		DeferredResult<T> tDeferredResult = new DeferredResult<>(TimeUnit.SECONDS.convert(5, TimeUnit.MILLISECONDS));
+		integerFuture.addCallback(new ListenableFutureCallback<T>() {
+			@Override
+			public void onFailure(Throwable throwable) {
+				tDeferredResult.setErrorResult(throwable);
+			}
 
-            @Override
-            public void onSuccess(T t) {
-                tDeferredResult.setResult((T) ResponseEntity.ok(t));
-            }
-        });
-        return tDeferredResult;
-    }
+			@Override
+			public void onSuccess(T t) {
+				tDeferredResult.setResult((T) ResponseEntity.ok(t));
+			}
+		});
+		return tDeferredResult;
+	}
 }

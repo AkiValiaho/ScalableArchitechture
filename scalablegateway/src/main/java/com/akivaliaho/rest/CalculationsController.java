@@ -16,20 +16,20 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController
 @RequestMapping("/api")
 public class CalculationsController {
-    @Autowired
-    CalculationService calculationService;
-    @Autowired
-    AsyncWrapper asyncWrapper;
+	@Autowired
+	CalculationService calculationService;
+	@Autowired
+	AsyncWrapper asyncWrapper;
 
-    @RequestMapping(value = "/hardCalculation", method = RequestMethod.POST)
-    public DeferredResult<Integer> doHardCalculation(@RequestParam Integer number1, Integer number2) {
-        ListenableFuture<Integer> integerFuture = calculationService.doHardCalculation(number1, number2);
-        return asyncWrapper.wrapAsDeferredResult(integerFuture);
-    }
+	@RequestMapping(value = "/hardCalculation", method = RequestMethod.POST)
+	public DeferredResult<Integer> doHardCalculation(@RequestParam Integer number1, Integer number2) {
+		ListenableFuture<Integer> integerFuture = calculationService.doHardCalculation(number1, number2);
+		return asyncWrapper.wrapAsDeferredResult(integerFuture);
+	}
 
-    @RequestMapping(value = "/doSuperHardCalculation", method = RequestMethod.POST)
-    public DeferredResult<Integer> doSuperHardCalculation(@RequestParam Integer number1, Integer number32) {
-        ListenableFuture<Integer> integerListenableFuture = calculationService.doSuperHardcalculation(number1, number32);
-        return asyncWrapper.wrapAsDeferredResult(integerListenableFuture);
-    }
+	@RequestMapping(value = "/doSuperHardCalculation", method = RequestMethod.POST)
+	public DeferredResult<Integer> doSuperHardCalculation(@RequestParam Integer number1, Integer number32) {
+		ListenableFuture<Integer> integerListenableFuture = calculationService.doSuperHardcalculation(number1, number32);
+		return asyncWrapper.wrapAsDeferredResult(integerListenableFuture);
+	}
 }

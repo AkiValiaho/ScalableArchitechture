@@ -1,7 +1,8 @@
 package com.akivaliaho.amqp;
 
+import com.akivaliaho.event.AsyncQueue;
 import com.akivaliaho.event.ServiceEvent;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,10 +11,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventUtil {
 
-    @Autowired
-    ESBRouter esbRouter;
+	private final ESBRouter esbRouter;
+	private final AsyncQueue asyncQueue;
 
-    public <V> V publishEvent(ServiceEvent event) {
-        return esbRouter.routeEvent(new ServiceEvent(event));
-    }
+	public EventUtil(ESBRouter esbRouter, AsyncQueue asyncQueue) {
+		this.esbRouter = esbRouter;
+		this.asyncQueue = asyncQueue;
+	}
+
+	public AsyncResult<?> publishEvent(ServiceEvent event) {
+		AsyncResult<?> vAsyncResult = new AsyncResult<>(esbRouter.routeEvent(new ServiceEvent(event)));
+		asyncQueue.addWaitingResult(vAsyncResult);
+		return vAsyncResult;
+	}
 }
