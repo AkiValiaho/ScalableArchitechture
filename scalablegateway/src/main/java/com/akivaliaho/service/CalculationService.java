@@ -1,6 +1,7 @@
 package com.akivaliaho.service;
 
 import com.akivaliaho.amqp.EventUtil;
+import com.akivaliaho.config.annotations.Interest;
 import com.akivaliaho.service.events.CalculateHardSumEvent;
 import com.akivaliaho.service.events.CalculateSuperHardSumEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class CalculationService {
 	}
 
 	@Async
+	@Interest(value = "com.akivaliaho.CalculateSuperHardSumResultEvent")
 	public ListenableFuture<Integer> doSuperHardcalculation(Integer number1, Integer number32, DeferredResult<Integer> gatewayDeferredResult) {
 		return eventUtil.publishEvent(new CalculateSuperHardSumEvent(number1, number32), gatewayDeferredResult);
 	}

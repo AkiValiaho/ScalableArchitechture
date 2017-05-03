@@ -2,10 +2,7 @@ package com.akivaliaho.amqp;
 
 import com.akivaliaho.config.ConfigEnum;
 import com.akivaliaho.config.ConfigurationHolder;
-import com.akivaliaho.event.AsyncQueue;
-import com.akivaliaho.event.InterestEvent;
-import com.akivaliaho.event.LocalEventDelegator;
-import com.akivaliaho.event.ServiceEvent;
+import com.akivaliaho.event.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -100,7 +97,7 @@ public class ESBRouter {
 				log.info("Got message: {}", foo.getEventName());
 				//Is it a Result event?
 				if (foo.getEventName().toLowerCase().contains("result")) {
-					asyncQueue.solveResult(foo);
+					asyncQueue.solveResult(((ServiceEventResult) foo));
 				} else {
 					localEventDelegator.delegateEvent(foo);
 				}

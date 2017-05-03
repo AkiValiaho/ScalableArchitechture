@@ -31,8 +31,7 @@ public class ExchangeToServiceEvent implements Processor {
 		}
 		ServiceEventResult serviceEventResult = null;
 		if (serviceEvent.getEventName().toLowerCase().contains("result")) {
-			objectInputStream = feedOutputStream(exchange);
-			serviceEventResult = (ServiceEventResult) objectInputStream.readObject();
+			serviceEventResult = new ServiceEventResult(serviceEvent);
 		}
 		//TODO Pickup the listeners of this particular event before sending it back to the broker
 		List<String> interestedParties = eventInterestHolder.getInterestedParties(serviceEvent);
