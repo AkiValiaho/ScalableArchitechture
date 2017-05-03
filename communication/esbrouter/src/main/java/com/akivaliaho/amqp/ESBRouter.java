@@ -17,6 +17,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -32,6 +33,8 @@ public class ESBRouter {
 	private final ConfigurationHolder configurationHolder;
 	private final LocalEventDelegator localEventDelegator;
 	private final AsyncQueue asyncQueue;
+	@Autowired
+	ApplicationContext applicationContext;
 	private String serviceName;
 	private RabbitTemplate template;
 	private String routingKey;
@@ -65,7 +68,10 @@ public class ESBRouter {
 		messageContainerInit(connectionFactory, serviceQueue);
 		// send something
 		this.template = new RabbitTemplate(connectionFactory);
-		this.localEventDelegator.setESBRouter(this);
+
+		//Initialize localEventDelegatorlocalEventDelegator
+		EventUtil eventUtil = new EventUtil(this, asyncQueue);
+		localEventDelegator.setEventUtil(eventUtil);
 		informAboutInterests();
 	}
 
@@ -97,7 +103,6 @@ public class ESBRouter {
 					asyncQueue.solveResult(foo);
 				} else {
 					localEventDelegator.delegateEvent(foo);
-
 				}
 			}
 

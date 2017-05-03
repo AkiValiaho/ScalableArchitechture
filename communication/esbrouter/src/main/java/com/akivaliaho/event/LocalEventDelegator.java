@@ -1,6 +1,7 @@
 package com.akivaliaho.event;
 
-import com.akivaliaho.amqp.ESBRouter;
+import com.akivaliaho.amqp.EventUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -16,10 +17,18 @@ import java.util.Map;
 @Component
 @Slf4j
 public class LocalEventDelegator {
-	@Autowired
 	ApplicationContext applicationContext;
 	private Map<String, Method> interestMap;
-	private com.akivaliaho.amqp.ESBRouter ESBRouter;
+
+
+	@Setter
+	private EventUtil eventUtil;
+
+	@Autowired
+	public LocalEventDelegator(ApplicationContext ctx) {
+		this.applicationContext = ctx;
+	}
+
 
 	public void delegateEvent(ServiceEvent foo) {
 		Method method = interestMap.get(foo.getEventName());
@@ -29,7 +38,11 @@ public class LocalEventDelegator {
 			Object bean = applicationContext.getBean(method.getDeclaringClass());
 			ServiceEvent invoke = (ServiceEvent) method.invoke(bean, parameters);
 			log.debug("Got event as a result of computation: {}", invoke);
-			this.ESBRouter.routeEvent(invoke);
+			if (invoke instanceof ServiceEventResult) {
+				eventUtil.publishEventResult(((ServiceEventResult) invoke));
+			} else {
+				eventUtil.publishEvent(invoke);
+			}
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
@@ -39,7 +52,4 @@ public class LocalEventDelegator {
 		this.interestMap = interestMap;
 	}
 
-	public void setESBRouter(ESBRouter ESBRouter) {
-		this.ESBRouter = ESBRouter;
-	}
 }
