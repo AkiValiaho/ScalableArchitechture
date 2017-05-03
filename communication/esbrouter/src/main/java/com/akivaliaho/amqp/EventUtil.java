@@ -4,6 +4,7 @@ import com.akivaliaho.event.AsyncQueue;
 import com.akivaliaho.event.ServiceEvent;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * Created by vagrant on 4/5/17.
@@ -19,9 +20,9 @@ public class EventUtil {
 		this.asyncQueue = asyncQueue;
 	}
 
-	public AsyncResult<?> publishEvent(ServiceEvent event) {
-		AsyncResult<?> vAsyncResult = new AsyncResult<>(esbRouter.routeEvent(new ServiceEvent(event)));
-		asyncQueue.addWaitingResult(vAsyncResult);
+	public <V> AsyncResult<V> publishEvent(ServiceEvent event, DeferredResult<Integer> gatewayDeferredResult) {
+		AsyncResult<V> vAsyncResult = new AsyncResult<>(esbRouter.routeEvent(new ServiceEvent(event)));
+		asyncQueue.addWaitingResult(gatewayDeferredResult);
 		return vAsyncResult;
 	}
 }

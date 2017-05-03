@@ -2,6 +2,7 @@ package com.akivaliaho.amqp;
 
 import com.akivaliaho.config.ConfigEnum;
 import com.akivaliaho.config.ConfigurationHolder;
+import com.akivaliaho.event.AsyncQueue;
 import com.akivaliaho.event.InterestEvent;
 import com.akivaliaho.event.LocalEventDelegator;
 import com.akivaliaho.event.ServiceEvent;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class ESBRouter {
 	private final ConfigurationHolder configurationHolder;
 	private final LocalEventDelegator localEventDelegator;
+	private final AsyncQueue asyncQueue;
 	private String serviceName;
 	private RabbitTemplate template;
 	private String routingKey;
@@ -37,9 +39,10 @@ public class ESBRouter {
 	private TopicExchange mq_to_esb_exchange;
 
 	@Autowired
-	public ESBRouter(ConfigurationHolder configurationHolder, LocalEventDelegator localEventDelegator) {
+	public ESBRouter(ConfigurationHolder configurationHolder, LocalEventDelegator localEventDelegator, AsyncQueue asyncQueue) {
 		this.configurationHolder = configurationHolder;
 		this.localEventDelegator = localEventDelegator;
+		this.asyncQueue = asyncQueue;
 	}
 
 	@PostConstruct
@@ -89,7 +92,13 @@ public class ESBRouter {
 		Object listener = new Object() {
 			public void handleMessage(ServiceEvent foo) {
 				log.info("Got message: {}", foo.getEventName());
-				localEventDelegator.delegateEvent(foo);
+				//Is it a Result event?
+				if (foo.getEventName().toLowerCase().contains("result")) {
+					asyncQueue.solveResult(foo);
+				} else {
+					localEventDelegator.delegateEvent(foo);
+
+				}
 			}
 
 			public void handleMessage(Object object) {

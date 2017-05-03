@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * Created by vagrant on 4/5/17.
@@ -17,16 +18,15 @@ public class CalculationService {
 	EventUtil eventUtil;
 
 	@Async
-	public ListenableFuture<Integer> doHardCalculation(Integer number1, Integer number2) {
-		return (ListenableFuture<Integer>) eventUtil.publishEvent(
-				new CalculateHardSumEvent(number1, number2)
-		);
+	public ListenableFuture<Integer> doHardCalculation(Integer number1, Integer number2, DeferredResult<Integer> gatewayDeferredResult) {
+		return eventUtil.publishEvent(
+				new CalculateHardSumEvent(number1, number2),
+				gatewayDeferredResult);
 	}
 
 	@Async
-	public ListenableFuture<Integer> doSuperHardcalculation(Integer number1, Integer number32) {
-		//TODO refactor this horrific looking initialization
-		return (ListenableFuture<Integer>) eventUtil.publishEvent(new CalculateSuperHardSumEvent(number1, number32));
+	public ListenableFuture<Integer> doSuperHardcalculation(Integer number1, Integer number32, DeferredResult<Integer> gatewayDeferredResult) {
+		return eventUtil.publishEvent(new CalculateSuperHardSumEvent(number1, number32), gatewayDeferredResult);
 	}
 
 }
