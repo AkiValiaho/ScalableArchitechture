@@ -23,7 +23,7 @@ public class EventUtil {
 
     public <V> AsyncResult<V> publishEvent(ServiceEvent event, DeferredResult<Integer> gatewayDeferredResult) {
         AsyncResult<V> vAsyncResult = new AsyncResult<>(esbRouter.routeEvent(new ServiceEvent(event)));
-        asyncQueue.addWaitingResult(gatewayDeferredResult);
+        asyncQueue.addWaitingResult(gatewayDeferredResult, event.getParameters());
         return vAsyncResult;
     }
 

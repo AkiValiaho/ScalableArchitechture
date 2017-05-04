@@ -20,7 +20,7 @@ public abstract class BaseService {
     public <V> DeferredResult<V> callServiceMethod(String methodName, Object... params) {
         try {
             DeferredResult<V> deferredResult = new DeferredResult<>();
-            asyncQueue.addWaitingResult(deferredResult);
+            asyncQueue.addWaitingResult(deferredResult, params);
             Class<?>[] classes = parseParamClasses(params);
             Method method = this.getClass().getMethod(methodName, classes);
             Object invoke = method.invoke(this, params);
