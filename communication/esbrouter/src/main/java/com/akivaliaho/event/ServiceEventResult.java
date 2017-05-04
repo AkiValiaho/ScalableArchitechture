@@ -26,6 +26,9 @@ public class ServiceEventResult extends ServiceEvent {
     @Getter
     @Setter
     private Object[] originalParameters;
+    @Getter
+    @Setter
+    private String originalEventName;
 
     public ServiceEventResult(String eventName) {
         this.eventName = eventName;

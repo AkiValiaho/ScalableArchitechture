@@ -18,7 +18,7 @@ public class AsyncQueue {
     Map<Params, List<DeferredResult<?>>> hitList = new HashMap<>();
 
     public void addWaitingResult(DeferredResult<?> vAsyncResult, Object[] params) {
-        if (hitList.containsKey(params)) {
+        if (hitList.containsKey(new Params(params))) {
             List<DeferredResult<?>> deferredResults = hitList.get(params);
             deferredResults.add(vAsyncResult);
         } else {
@@ -29,11 +29,13 @@ public class AsyncQueue {
     }
 
     public void solveResult(ServiceEventResult foo) {
-        Object o = foo.getParameters()[0];
-        asyncList.stream()
-                .forEach(result -> result.setResult(o));
         log.debug("Got ServiceEvent: {}", foo);
-        asyncList.clear();
+        Object[] originalParameters = foo.getOriginalParameters();
+        Params param = new Params(originalParameters);
+        if (hitList.containsKey(param)) {
+            List<DeferredResult<?>> deferredResults = hitList.get(param);
+
+        }
     }
 
     @EqualsAndHashCode

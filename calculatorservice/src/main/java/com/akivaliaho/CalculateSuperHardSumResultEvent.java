@@ -7,7 +7,7 @@ import com.akivaliaho.event.ServiceEventResult;
  */
 public class CalculateSuperHardSumResultEvent extends ServiceEventResult {
 
-	public CalculateSuperHardSumResultEvent(int i) {
-		saveEvent(this.getClass().getName(), i);
-	}
+    public CalculateSuperHardSumResultEvent(int i) {
+        saveEvent(this.getClass().getName(), i);
+    }
 }

@@ -41,6 +41,7 @@ public class LocalEventDelegator {
             if (invoke instanceof ServiceEventResult) {
                 ServiceEventResult invoke1 = (ServiceEventResult) invoke;
                 invoke1.setOriginalParameters(parameters);
+                invoke1.setOriginalEventName(foo.getEventName());
                 eventUtil.publishEventResult(invoke1);
             } else {
                 eventUtil.publishEvent(invoke);
