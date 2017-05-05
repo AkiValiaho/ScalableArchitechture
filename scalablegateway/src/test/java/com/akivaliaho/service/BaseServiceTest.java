@@ -28,11 +28,11 @@ public class BaseServiceTest {
             @Mock
             public void addWaitingResult(DeferredResult<?> vAsyncResult, Object[] params, String eventName) {
                 //Do nothing
+                //A new AsyncResult is given
                 assertEquals(eventName, CalculateHardSumEvent.class.getName());
             }
         };
         Deencapsulation.setField(testService, "asyncQueue", asyncQueueMockUp.getMockInstance());
         testService.callServiceMethod("something", null);
     }
-
 }

@@ -42,6 +42,9 @@ public abstract class BaseService {
     private Class<?>[] parseParamClasses(Object[] params) {
         List<? extends Class<?>> collect = Arrays.stream(params)
                 .map(param -> {
+                    if (param == null) {
+                        return null;
+                    }
                     Class<?> aClass = param.getClass();
                     return aClass;
                 })
