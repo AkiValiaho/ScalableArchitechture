@@ -14,18 +14,27 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class AsyncQueue {
-    List<DeferredResult<Object>> asyncList = new ArrayList<>();
-    Map<Params, List<DeferredResult<?>>> hitList = new HashMap<>();
+    Map<Params, Map<String, List<DeferredResult<?>>>> hitList = new HashMap<>();
 
-    public void addWaitingResult(DeferredResult<?> vAsyncResult, Object[] params) {
-        if (hitList.containsKey(new Params(params))) {
-            List<DeferredResult<?>> deferredResults = hitList.get(params);
-            deferredResults.add(vAsyncResult);
+    public void addWaitingResult(DeferredResult<?> vAsyncResult, Object[] params, String eventName) {
+        Params params1 = new Params(params);
+        if (hitList.containsKey(params1)) {
+            Map<String, List<DeferredResult<?>>> stringListMap = hitList.get(params1);
+            if (stringListMap.containsKey(eventName)) {
+                List<DeferredResult<?>> deferredResults = stringListMap.get(eventName);
+                deferredResults.add(vAsyncResult);
+            } else {
+                List<DeferredResult<?>> deferredResults = new ArrayList<>();
+                deferredResults.add(vAsyncResult);
+                stringListMap.put(eventName, deferredResults);
+            }
         } else {
-            ArrayList<DeferredResult<?>> deferredResults = new ArrayList<>();
-            hitList.put(new Params(params), deferredResults);
+            HashMap<String, List<DeferredResult<?>>> stringListHashMap = new HashMap<>();
+            List<DeferredResult<?>> listOfDeferredResults = new ArrayList<>();
+            listOfDeferredResults.add(vAsyncResult);
+            stringListHashMap.put(eventName, listOfDeferredResults);
+            hitList.put(params1, stringListHashMap);
         }
-
     }
 
     public void solveResult(ServiceEventResult foo) {
@@ -33,20 +42,19 @@ public class AsyncQueue {
         Object[] originalParameters = foo.getOriginalParameters();
         Params param = new Params(originalParameters);
         if (hitList.containsKey(param)) {
-            List<DeferredResult<?>> deferredResults = hitList.get(param);
-
+            Map<String, List<DeferredResult<?>>> stringListMap = hitList.get(param);
         }
     }
+}
 
-    @EqualsAndHashCode
-    private class Params {
-        private final String paramsAsString;
+@EqualsAndHashCode
+class Params {
+    private final String paramsAsString;
 
-        public Params(Object[] params) {
-            String collect = Arrays.stream(params)
-                    .map(param -> param.toString())
-                    .collect(Collectors.joining(""));
-            this.paramsAsString = collect;
-        }
+    public Params(Object[] params) {
+        String collect = Arrays.stream(params)
+                .map(param -> param.toString())
+                .collect(Collectors.joining(""));
+        this.paramsAsString = collect;
     }
 }

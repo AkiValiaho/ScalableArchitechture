@@ -17,6 +17,7 @@ public class CalculationService extends BaseService {
     EventUtil eventUtil;
 
     @Async
+    @Interest(emit = CalculateHardSumEvent.class)
     public void doHardCalculation(Integer number1, Integer number2) {
         eventUtil.publishEvent(
                 new CalculateHardSumEvent(number1, number2)
@@ -24,7 +25,7 @@ public class CalculationService extends BaseService {
     }
 
     @Async
-    @Interest(value = "com.akivaliaho.CalculateSuperHardSumResultEvent")
+    @Interest(value = "com.akivaliaho.CalculateSuperHardSumResultEvent", emit = CalculateSuperHardSumEvent.class)
     public void doSuperHardcalculation(Integer number1, Integer number32) {
         eventUtil.publishEvent(new CalculateSuperHardSumEvent(number1, number32));
     }

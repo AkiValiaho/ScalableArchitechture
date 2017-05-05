@@ -1,5 +1,6 @@
 package com.akivaliaho.service;
 
+import com.akivaliaho.config.annotations.Interest;
 import com.akivaliaho.event.AsyncQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -20,9 +21,16 @@ public abstract class BaseService {
     public <V> DeferredResult<V> callServiceMethod(String methodName, Object... params) {
         try {
             DeferredResult<V> deferredResult = new DeferredResult<>();
-            asyncQueue.addWaitingResult(deferredResult, params);
-            Class<?>[] classes = parseParamClasses(params);
+            Class<?>[] classes = null;
+            if (params != null) {
+                classes = parseParamClasses(params);
+            }
             Method method = this.getClass().getMethod(methodName, classes);
+            Interest annotation = method.getAnnotation(Interest.class);
+            if (annotation == null || annotation.emit() == null) {
+                throw new IllegalArgumentException("@Interest annotation or given emit-value not present in method: " + method.getName());
+            }
+            asyncQueue.addWaitingResult(deferredResult, params, annotation.emit().getName());
             Object invoke = method.invoke(this, params);
             return deferredResult;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

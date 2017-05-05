@@ -13,4 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Interest {
     String value() default "";
+
+    Class<?> emit() default Object.class;
 }
