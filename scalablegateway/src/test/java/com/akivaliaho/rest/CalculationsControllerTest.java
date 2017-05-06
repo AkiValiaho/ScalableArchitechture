@@ -1,5 +1,6 @@
 package com.akivaliaho.rest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,13 +27,20 @@ public class CalculationsControllerTest {
     @Autowired
     WebApplicationContext webApplicationContext;
     MockMvc mockMvc;
+    private IntegrationTestHarness testHarness;
 
 
     @Before
     public void init() {
+        this.testHarness = new IntegrationTestHarness();
         this.mockMvc = MockMvcBuilders
-                .webAppContextSetup(webApplicationContext)
-                .build();
+                .webAppContextSetup(webApplicationContext).build();
+        testHarness.startServices();
+    }
+
+    @After
+    public void stopServices() {
+        this.testHarness.stopServices();
     }
 
     @Test
