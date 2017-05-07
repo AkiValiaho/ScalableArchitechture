@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Import(value = ControllerTest.class)
-public class CalculationsControllerTest {
+public class CalculationsControllerTestIT {
     @Autowired
     WebApplicationContext webApplicationContext;
     MockMvc mockMvc;
