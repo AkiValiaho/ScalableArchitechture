@@ -14,6 +14,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,13 +47,16 @@ public class CalculationsControllerTestIT {
     @Test
     public void doHardCalculation() throws Exception {
         MultiValueMap<String, String> numberMap = new LinkedMultiValueMap<>();
-        numberMap.add("number1", "1");
-        numberMap.add("number32", "2");
+        numberMap.add("number1", "5");
+        numberMap.add("number32", "6");
         MvcResult perform = mockMvc.perform(post("/api/doSuperHardCalculation").params(numberMap))
                 .andReturn();
-        mockMvc.perform(asyncDispatch(perform))
-                .andExpect(status().isOk());
+        MvcResult mvcResult = mockMvc.perform(asyncDispatch(perform))
+                .andExpect(status().isOk()).andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        assertEquals(contentAsString, "11");
     }
+
 
     @Test
     public void doSuperHardCalculation() throws Exception {

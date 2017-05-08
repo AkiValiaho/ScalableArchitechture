@@ -30,8 +30,7 @@ public class IntegrationTestHarness {
         property = file.getParent();
         //Traverse the directory structure to find the runnable jars
         List<String> runnables = traversePath(property);
-        runnables.stream()
-                .map(this::addCommand)
+        runnables.parallelStream().map(this::addCommand)
                 .forEach(cmd -> {
                     try {
                         Process exec = runtime.exec(cmd);

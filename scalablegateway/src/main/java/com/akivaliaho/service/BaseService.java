@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -20,7 +21,7 @@ public abstract class BaseService {
 
     public <V> DeferredResult<V> callServiceMethod(String methodName, Object... params) {
         try {
-            DeferredResult<V> deferredResult = new DeferredResult<>();
+            DeferredResult<V> deferredResult = new DeferredResult<>(TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS));
             Class<?>[] classes = null;
             if (params != null) {
                 classes = parseParamClasses(params);

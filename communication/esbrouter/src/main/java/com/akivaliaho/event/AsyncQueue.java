@@ -38,11 +38,17 @@ public class AsyncQueue {
     }
 
     public void solveResult(ServiceEventResult foo) {
+        //TODO Write some tests to validate this brittle piece of logic
         log.debug("Got ServiceEvent: {}", foo);
         Object[] originalParameters = foo.getOriginalParameters();
         Params param = new Params(originalParameters);
         if (hitList.containsKey(param)) {
             Map<String, List<DeferredResult<?>>> stringListMap = hitList.get(param);
+            List<DeferredResult<?>> deferredResults = stringListMap.get(foo.getOriginalEventName());
+            DeferredResult<Object> deferredResult = ((DeferredResult<Object>) deferredResults.get(deferredResults.size() - 1));
+            deferredResult.setResult(foo.getParameters()[0]);
+            //Remove from the list
+            deferredResults.remove(deferredResults.size() - 1);
         }
     }
 }
