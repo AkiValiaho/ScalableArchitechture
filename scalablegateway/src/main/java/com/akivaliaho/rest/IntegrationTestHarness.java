@@ -1,15 +1,17 @@
 package com.akivaliaho.rest;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
  * Created by akivv on 6.5.2017.
  */
+@Slf4j
 public class IntegrationTestHarness {
 
     private ExecutorService executorService;
@@ -28,39 +30,34 @@ public class IntegrationTestHarness {
         property = file.getParent();
         //Traverse the directory structure to find the runnable jars
         List<String> runnables = traversePath(property);
-        List<Process> processList = runnables.stream()
+        runnables.stream()
                 .map(this::addCommand)
-                .map(cmd -> {
+                .forEach(cmd -> {
                     try {
-                        return runtime.exec(cmd);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
-                .collect(Collectors.toList());
-        executorService.submit(() -> {
-            processList.parallelStream()
-                    .forEach(process -> {
-                        try {
+                        Process exec = runtime.exec(cmd);
+                        executorService.submit(() -> {
                             executorService.submit(() -> {
-                                InputStream inputStream = process.getInputStream();
+                                InputStream inputStream = exec.getInputStream();
                                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                                 String line;
                                 try {
                                     while ((line = bufferedReader.readLine()) != null) {
-                                        System.out.println(line);
+                                        log.info(line);
                                     }
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             });
-                            process.waitFor();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        });
+                            try {
+                                exec.waitFor();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
 
