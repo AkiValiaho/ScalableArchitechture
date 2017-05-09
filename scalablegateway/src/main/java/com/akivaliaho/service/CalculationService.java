@@ -1,10 +1,9 @@
 package com.akivaliaho.service;
 
-import com.akivaliaho.amqp.EventUtil;
 import com.akivaliaho.config.annotations.Interest;
+import com.akivaliaho.event.ServiceEvent;
 import com.akivaliaho.service.events.CalculateHardSumEvent;
 import com.akivaliaho.service.events.CalculateSuperHardSumEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -13,21 +12,17 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CalculationService extends BaseService {
-    @Autowired
-    EventUtil eventUtil;
-
     @Async
     @Interest(emit = CalculateHardSumEvent.class)
-    public void doHardCalculation(Integer number1, Integer number2) {
-        eventUtil.publishEvent(
-                new CalculateHardSumEvent(number1, number2)
-        );
+    public CalculateHardSumEvent doHardCalculation(Integer number1, Integer number2) {
+        return new CalculateHardSumEvent(number1, number2);
     }
 
     @Async
     @Interest(value = "com.akivaliaho.CalculateSuperHardSumResultEvent", emit = CalculateSuperHardSumEvent.class)
-    public void doSuperHardcalculation(Integer number1, Integer number32) {
-        eventUtil.publishEvent(new CalculateSuperHardSumEvent(number1, number32));
+    public ServiceEvent doSuperHardcalculation(Integer number1, Integer number32) {
+        return
+                new CalculateSuperHardSumEvent(number1, number32);
     }
 
 }

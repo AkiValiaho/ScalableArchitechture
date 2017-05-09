@@ -1,6 +1,5 @@
 package com.akivaliaho.rest;
 
-import com.akivaliaho.AsyncWrapper;
 import com.akivaliaho.service.CalculationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +16,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 public class CalculationsController {
     @Autowired
     CalculationService calculationService;
-    @Autowired
-    AsyncWrapper asyncWrapper;
 
     @RequestMapping(value = "/hardCalculation", method = RequestMethod.POST)
     public DeferredResult<Integer> doHardCalculation(@RequestParam Integer number1, Integer number2) {
