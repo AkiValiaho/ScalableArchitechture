@@ -4,7 +4,6 @@ import com.akivaliaho.config.annotations.Interest;
 import com.akivaliaho.event.ServiceEvent;
 import com.akivaliaho.service.events.CalculateHardSumEvent;
 import com.akivaliaho.service.events.CalculateSuperHardSumEvent;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,13 +11,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CalculationService extends BaseService {
-    @Async
     @Interest(emit = CalculateHardSumEvent.class)
     public CalculateHardSumEvent doHardCalculation(Integer number1, Integer number2) {
         return new CalculateHardSumEvent(number1, number2);
     }
 
-    @Async
     @Interest(value = "com.akivaliaho.CalculateSuperHardSumResultEvent", emit = CalculateSuperHardSumEvent.class)
     public ServiceEvent doSuperHardcalculation(Integer number1, Integer number32) {
         return

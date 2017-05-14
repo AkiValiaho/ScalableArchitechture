@@ -103,7 +103,7 @@ public class ESBRouter {
                 }
             }
 
-            public void handleMessage(Object object) {
+            public void handlefessage(Object object) {
                 //Something is wrong because this is not an event
                 log.error("Message received is malformed: {}", object);
             }

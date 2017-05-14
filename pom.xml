@@ -17,5 +17,6 @@
         <module>calculatorservice</module>
         <module>communication</module>
         <module>camel</module>
+        <module>stringtoolsservice</module>
     </modules>
 </project>
