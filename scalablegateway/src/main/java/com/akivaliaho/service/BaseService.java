@@ -45,10 +45,10 @@ public abstract class BaseService {
             }
             Method method = this.getClass().getMethod(methodName, classes);
             Interest annotation = method.getAnnotation(Interest.class);
+            asyncQueue.addWaitingResult(deferredResult, params, annotation.emit().getName());
             if (annotation == null || annotation.emit() == null) {
                 throw new IllegalArgumentException("@Interest annotation or given emit-value not present in method: " + method.getName());
             }
-            asyncQueue.addWaitingResult(deferredResult, params, annotation.emit().getName());
             threadPoolTaskExecutor.execute(() -> {
                 ServiceEvent invoke = null;
                 try {

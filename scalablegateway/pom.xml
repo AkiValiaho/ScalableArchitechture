@@ -36,6 +36,12 @@
             <artifactId>jmockit</artifactId>
             <version>1.31</version>
         </dependency>
+        <!-- Spring AOP for service method invocation delegation to a ThreadTaskExecutor -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+            <version>1.5.3.RELEASE</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
         <dependency>
             <groupId>io.springfox</groupId>
