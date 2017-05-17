@@ -17,6 +17,7 @@ public class IntegrationTestHarness {
     private ExecutorService executorService;
 
     public String addCommand(String s) {
+        //TODO Fix command execution order, OR CREATE A DEDICATED configuration holder to decouple everything
         //Basic execution of runnable jar with -jar switch
         return "java -jar " + s;
     }

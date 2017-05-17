@@ -1,7 +1,7 @@
 package com.akivaliaho.rest;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,20 +28,18 @@ public class CalculationsControllerTestIT {
     @Autowired
     WebApplicationContext webApplicationContext;
     MockMvc mockMvc;
-    private IntegrationTestHarness testHarness;
 
 
-    @Before
-    public void init() {
-        this.testHarness = new IntegrationTestHarness();
-        this.mockMvc = MockMvcBuilders
-                .webAppContextSetup(webApplicationContext).build();
+    @BeforeClass
+    public static void init() {
+        IntegrationTestHarness testHarness = new IntegrationTestHarness();
         testHarness.startServices();
     }
 
-    @After
-    public void stopServices() {
-        this.testHarness.stopServices();
+    @Before
+    public void initBeforeTest() {
+        this.mockMvc = MockMvcBuilders
+                .webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
