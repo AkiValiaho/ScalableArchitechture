@@ -1,13 +1,14 @@
 package com.akivaliaho.amqp;
 
+import com.akivaliaho.ServiceEvent;
+import com.akivaliaho.ServiceEventResult;
 import com.akivaliaho.config.ConfigEnum;
 import com.akivaliaho.config.ConfigurationHolder;
-import com.akivaliaho.event.*;
+import com.akivaliaho.event.AsyncQueue;
+import com.akivaliaho.event.InterestEvent;
+import com.akivaliaho.event.LocalEventDelegator;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -18,6 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.*;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,7 @@ public class ESBRouter {
         mq_to_esb_exchange = new TopicExchange(messagingConfiguration.get(ConfigEnum.MQ_TO_ESB_EXCHANGE), true, false);
         bindingsInit(messagingConfiguration, admin, serviceQueue, toESBQueue);
         messageContainerInit(connectionFactory, serviceQueue);
+        this.serviceName = messagingConfiguration.get("mq.servicebasename");
         // send something
         this.template = new RabbitTemplate(connectionFactory);
 
@@ -93,6 +96,17 @@ public class ESBRouter {
         SimpleMessageListenerContainer container =
                 new SimpleMessageListenerContainer(connectionFactory);
         Object listener = new Object() {
+            public void handleMessage(byte[] bytes) {
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+                try {
+                    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+                    ServiceEvent serviceEvent = (ServiceEvent) objectInputStream.readObject();
+                    handleMessage(serviceEvent);
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
             public void handleMessage(ServiceEvent foo) {
                 log.info("Got message: {}", foo.getEventName());
                 //Is it a Result event?
@@ -129,7 +143,19 @@ public class ESBRouter {
     public <V> V routeEvent(ServiceEvent event) {
         //Send message to an exchange which routes it to the camel esb
         log.info("Routing event to the master ESB");
-        this.template.convertAndSend(mq_to_esb_exchange.getName(), "master", event);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(bos);
+            objectOutputStream.writeObject(event);
+            MessageProperties messageProperties = new MessageProperties();
+            messageProperties.setHeader("serviceName", serviceName);
+            Message message = new Message(bos.toByteArray(), messageProperties);
+            this.template.convertAndSend(mq_to_esb_exchange.getName(), "master", message);
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

@@ -1,5 +1,7 @@
 package com.akivaliaho.event;
 
+import com.akivaliaho.ServiceEvent;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

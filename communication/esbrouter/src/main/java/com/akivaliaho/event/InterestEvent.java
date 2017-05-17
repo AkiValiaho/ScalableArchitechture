@@ -1,5 +1,7 @@
 package com.akivaliaho.event;
 
+import com.akivaliaho.ServiceEvent;
+
 import java.util.List;
 
 /**

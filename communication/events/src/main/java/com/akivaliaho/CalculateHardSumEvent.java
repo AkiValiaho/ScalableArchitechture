@@ -1,6 +1,4 @@
-package com.akivaliaho.service.events;
-
-import com.akivaliaho.event.ServiceEvent;
+package com.akivaliaho;
 
 /**
  * Created by akivv on 23.4.2017.

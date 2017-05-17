@@ -1,8 +1,6 @@
 package com.akivaliaho;
 
 import com.akivaliaho.event.EventInterestHolder;
-import com.akivaliaho.event.ServiceEvent;
-import com.akivaliaho.event.ServiceEventResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

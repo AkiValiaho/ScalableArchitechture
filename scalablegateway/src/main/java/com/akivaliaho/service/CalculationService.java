@@ -1,20 +1,24 @@
 package com.akivaliaho.service;
 
+import com.akivaliaho.CalculateSuperHardSumResultEvent;
 import com.akivaliaho.config.annotations.Interest;
-import com.akivaliaho.service.events.CalculateHardSumEvent;
-import com.akivaliaho.service.events.CalculateSuperHardSumEvent;
+import com.akivaliaho.CalculateHardSumEvent;
+import com.akivaliaho.CalculateSuperHardSumEvent;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * Created by vagrant on 4/5/17.
  */
 @Service
-public class CalculationService extends BaseService {
+public class CalculationService {
     @Interest(emit = CalculateHardSumEvent.class)
-    public void doHardCalculation(Integer number1, Integer number2) {
+    public DeferredResult<Integer> doHardCalculation(Integer number1, Integer number2) {
+        return null;
     }
 
-    @Interest(value = "com.akivaliaho.CalculateSuperHardSumResultEvent", emit = CalculateSuperHardSumEvent.class)
-    public void doSuperHardcalculation(Integer number1, Integer number32) {
+    @Interest(value = CalculateSuperHardSumResultEvent.class, emit = CalculateSuperHardSumEvent.class)
+    public DeferredResult<Integer> doSuperHardcalculation(Integer number1, Integer number32) {
+        return null;
     }
 }

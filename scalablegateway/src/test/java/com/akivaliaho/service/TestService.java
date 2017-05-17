@@ -1,14 +1,15 @@
 package com.akivaliaho.service;
 
 import com.akivaliaho.config.annotations.Interest;
-import com.akivaliaho.service.events.CalculateHardSumEvent;
+import com.akivaliaho.CalculateHardSumEvent;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * Created by akivv on 5.5.2017.
  */
-public class TestService extends BaseService {
+public class TestService {
     @Interest(emit = CalculateHardSumEvent.class)
-    public void something() {
-
+    public DeferredResult<Integer> something() {
+        return null;
     }
 }

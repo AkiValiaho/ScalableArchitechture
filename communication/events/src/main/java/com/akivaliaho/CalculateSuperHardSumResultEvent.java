@@ -1,7 +1,5 @@
 package com.akivaliaho;
 
-import com.akivaliaho.event.ServiceEventResult;
-
 /**
  * Created by akivv on 1.5.2017.
  */

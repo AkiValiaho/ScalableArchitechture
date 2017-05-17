@@ -1,5 +1,7 @@
 package com.akivaliaho.event;
 
+import com.akivaliaho.ServiceEvent;
+import com.akivaliaho.ServiceEventResult;
 import com.akivaliaho.amqp.EventUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

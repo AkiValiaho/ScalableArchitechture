@@ -22,6 +22,7 @@ public class FromMQRouteBuilder extends RouteBuilder {
      */
     public void configure() {
         from("rabbitmq://localhost:5672/toBrokerExchange?routingKey=master&queue=toBrokerQueue&username=hello&password=world&exchangeType=topic&autoDelete=false")
+                .log("Got message from service: ${in.header.serviceName}")
                 .process(exchangeToServiceEvent);
         //TODO Check if this works properly
         from("direct:fromESB")

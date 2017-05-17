@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>communication/events</module>
         <module>communication/configurator</module>
         <module>communication/esbrouter</module>
         <module>

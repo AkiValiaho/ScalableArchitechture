@@ -1,4 +1,5 @@
-import com.akivaliaho.AppendStringsEventResult;
+package com.akivaliaho;
+
 import com.akivaliaho.config.annotations.Interest;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class StringTool {
 
 
-    @Interest(value = "com.akivaliaho.service.events.AppendStrings")
+    @Interest(value = AppendStringsEvent.class)
     public AppendStringsEventResult stringAppend(String a, String b) {
         return new AppendStringsEventResult(a + b);
     }

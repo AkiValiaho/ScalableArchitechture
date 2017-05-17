@@ -1,30 +1,15 @@
-package com.akivaliaho.event;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+package com.akivaliaho;
 
 import java.io.Serializable;
 
 /**
  * Created by vagrant on 4/5/17.
  */
-@NoArgsConstructor
 public class ServiceEvent implements Serializable {
-    @Getter
-    @Setter
     private String originalEventName;
-    @Getter
-    @Setter
     private Object[] originalParameters;
-    @Getter
-    @Setter
     private Long id;
-    @Getter
-    @Setter
     private String eventName;
-    @Getter
     private Object[] parameters;
 
     public ServiceEvent(String eventName) {
@@ -39,6 +24,9 @@ public class ServiceEvent implements Serializable {
             this.originalParameters = event.getOriginalParameters();
             this.originalEventName = event.getOriginalEventName();
         }
+    }
+
+    public ServiceEvent() {
     }
 
     @Override
@@ -63,11 +51,58 @@ public class ServiceEvent implements Serializable {
         return new EventParams(eventName, parameters);
     }
 
-    @AllArgsConstructor
-    class EventParams {
-        @Getter
+    public String getOriginalEventName() {
+        return this.originalEventName;
+    }
+
+    public Object[] getOriginalParameters() {
+        return this.originalParameters;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getEventName() {
+        return this.eventName;
+    }
+
+    public Object[] getParameters() {
+        return this.parameters;
+    }
+
+    public void setOriginalEventName(String originalEventName) {
+        this.originalEventName = originalEventName;
+    }
+
+    public void setOriginalParameters(Object[] originalParameters) {
+        this.originalParameters = originalParameters;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
+
+    public class EventParams {
         String eventName;
-        @Getter
         Object[] params;
+
+        @java.beans.ConstructorProperties({"eventName", "params"})
+        public EventParams(String eventName, Object[] params) {
+            this.eventName = eventName;
+            this.params = params;
+        }
+
+        public String getEventName() {
+            return this.eventName;
+        }
+
+        public Object[] getParams() {
+            return this.params;
+        }
     }
 }

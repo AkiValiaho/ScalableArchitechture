@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Interest {
-    String value() default "";
+    Class<?> value() default Object.class;
 
     Class<?> emit() default Object.class;
 }

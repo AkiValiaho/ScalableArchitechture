@@ -1,8 +1,8 @@
 package com.akivaliaho.amqp;
 
+import com.akivaliaho.ServiceEvent;
+import com.akivaliaho.ServiceEventResult;
 import com.akivaliaho.event.AsyncQueue;
-import com.akivaliaho.event.ServiceEvent;
-import com.akivaliaho.event.ServiceEventResult;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;

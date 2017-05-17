@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SuperCalculator {
-	@Interest(value = "com.akivaliaho.service.events.CalculateSuperHardSumEvent")
-	public CalculateSuperHardSumResultEvent calculateSuperHard(Integer one, Integer two) {
-		int i = one + two;
-		return new CalculateSuperHardSumResultEvent(i);
-	}
+    @Interest(value = CalculateSuperHardSumEvent.class)
+    public CalculateSuperHardSumResultEvent calculateSuperHard(Integer one, Integer two) {
+        int i = one + two;
+        return new CalculateSuperHardSumResultEvent(i);
+    }
 
 }

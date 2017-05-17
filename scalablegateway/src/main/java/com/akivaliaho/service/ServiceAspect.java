@@ -1,9 +1,9 @@
 package com.akivaliaho.service;
 
+import com.akivaliaho.ServiceEvent;
 import com.akivaliaho.amqp.EventUtil;
 import com.akivaliaho.config.annotations.Interest;
 import com.akivaliaho.event.AsyncQueue;
-import com.akivaliaho.event.ServiceEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

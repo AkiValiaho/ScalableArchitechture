@@ -19,7 +19,7 @@ public class StringsController {
 
     @RequestMapping(value = "/appendStrings", method = RequestMethod.POST)
     public DeferredResult<String> appendTwoStrings(String one, String two) {
-        return stringToolsService.callServiceMethod("appendStrings", one, two);
+        return stringToolsService.appendStrings(one, two);
     }
 
 }
