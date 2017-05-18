@@ -28,24 +28,9 @@ public class ExchangeToServiceEvent implements Processor {
         ObjectInputStream objectInputStream = exchangeTools.feedOutputStream(exchange);
         ServiceEvent serviceEvent = (ServiceEvent) objectInputStream.readObject();
         if (serviceEvent.getEventName().equals("declarationOfInterests")) {
-            ServiceEvent o = (ServiceEvent) ((ArrayList) serviceEvent.getParameters()[0]).get(0);
-            eventInterestHolder.registerInterests(serviceEvent);
-            if (o.getEventName().equals("com.akivaliaho.ConfigurationPollEventResult")) {
-                //Send an configHolderRoutingKey about every interest back to the configuration holder
-                configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
-                exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
-                return;
-            }
-            if (configHolderRoutingKey != null && !configHolderRoutingKey.isEmpty()) {
-                exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
-            }
+            registerInterests(exchange, serviceEvent);
         }
-        ServiceEventResult serviceEventResult = null;
-        if (serviceEvent.getEventName().toLowerCase().contains("result")) {
-            serviceEventResult = new ServiceEventResult(serviceEvent);
-            serviceEventResult.setOriginalEventName(serviceEvent.getOriginalEventName());
-            serviceEventResult.setOriginalParameters(serviceEvent.getOriginalParameters());
-        }
+        ServiceEventResult serviceEventResult = parseServiceEventResultIfNeeded(serviceEvent);
         List<String> interestedParties = eventInterestHolder.getInterestedParties(serviceEvent);
         if (interestedParties != null) {
             ServiceEventResult finalServiceEventResult = serviceEventResult;
@@ -53,6 +38,28 @@ public class ExchangeToServiceEvent implements Processor {
                     .forEach(event -> {
                         exchangeTools.sendExchangeThroughTemplate(exchange, serviceEvent, finalServiceEventResult, event);
                     });
+        }
+    }
+
+    private ServiceEventResult parseServiceEventResultIfNeeded(ServiceEvent serviceEvent) {
+        ServiceEventResult serviceEventResult = null;
+        if (serviceEvent.getEventName().toLowerCase().contains("result")) {
+            serviceEventResult = new ServiceEventResult(serviceEvent);
+            serviceEventResult.setOriginalEventName(serviceEvent.getOriginalEventName());
+            serviceEventResult.setOriginalParameters(serviceEvent.getOriginalParameters());
+        }
+        return serviceEventResult;
+    }
+
+    private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
+        ServiceEvent o = (ServiceEvent) ((ArrayList) serviceEvent.getParameters()[0]).get(0);
+        eventInterestHolder.registerInterests(serviceEvent);
+        if (o.getEventName().equals("com.akivaliaho.ConfigurationPollEventResult")) {
+            //Send an configHolderRoutingKey about every interest back to the configuration holder
+            configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
+            exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
+        } else if (configHolderRoutingKey != null && !configHolderRoutingKey.isEmpty()) {
+            exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
         }
     }
 
