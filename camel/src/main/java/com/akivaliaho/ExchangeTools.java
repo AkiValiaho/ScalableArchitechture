@@ -44,4 +44,14 @@ public class ExchangeTools {
         sendExchangeThroughTemplate(exchange, null, serviceEvent, event);
 
     }
+
+    public void sendToInterestedParties(List<String> interestedParties, ServiceEventResult serviceEventResult, Exchange exchange, ServiceEvent serviceEvent) {
+        if (interestedParties != null) {
+            ServiceEventResult finalServiceEventResult = serviceEventResult;
+            interestedParties
+                    .forEach(event -> {
+                        sendExchangeThroughTemplate(exchange, serviceEvent, finalServiceEventResult, event);
+                    });
+        }
+    }
 }

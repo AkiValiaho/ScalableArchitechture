@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,51 +15,47 @@ import java.util.List;
 public class ExchangeToServiceEvent implements Processor {
     private final EventInterestHolder eventInterestHolder;
     private final ExchangeTools exchangeTools;
+    private final ProcessPreparator processPreparator;
     private String configHolderRoutingKey;
 
-    public ExchangeToServiceEvent(EventInterestHolder eventInterestHolder, ExchangeTools exchangeTools) {
+    public ExchangeToServiceEvent(EventInterestHolder eventInterestHolder, ExchangeTools exchangeTools, ProcessPreparator processPreparator) {
         this.eventInterestHolder = eventInterestHolder;
         this.exchangeTools = exchangeTools;
+        this.processPreparator = processPreparator;
+        //TODO On-init connection to ConfigurationHolder
     }
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        ObjectInputStream objectInputStream = exchangeTools.feedOutputStream(exchange);
-        ServiceEvent serviceEvent = (ServiceEvent) objectInputStream.readObject();
+        processPreparator.feedExchange(exchange).invoke();
+        List<String> interestedParties = processPreparator.getInterestedParties();
+        ServiceEventResult serviceEventResult = processPreparator.getServiceEventResult();
+        ServiceEvent serviceEvent = processPreparator.getServiceEvent();
+        handleDeclarationOfInterest(exchange, serviceEvent);
+        exchangeTools.sendToInterestedParties(interestedParties, serviceEventResult, exchange, serviceEvent);
+
+    }
+
+    private void handleDeclarationOfInterest(Exchange exchange, ServiceEvent serviceEvent) {
         if (serviceEvent.getEventName().equals("declarationOfInterests")) {
             registerInterests(exchange, serviceEvent);
         }
-        ServiceEventResult serviceEventResult = parseServiceEventResultIfNeeded(serviceEvent);
-        List<String> interestedParties = eventInterestHolder.getInterestedParties(serviceEvent);
-        if (interestedParties != null) {
-            ServiceEventResult finalServiceEventResult = serviceEventResult;
-            interestedParties
-                    .forEach(event -> {
-                        exchangeTools.sendExchangeThroughTemplate(exchange, serviceEvent, finalServiceEventResult, event);
-                    });
-        }
-    }
-
-    private ServiceEventResult parseServiceEventResultIfNeeded(ServiceEvent serviceEvent) {
-        ServiceEventResult serviceEventResult = null;
-        if (serviceEvent.getEventName().toLowerCase().contains("result")) {
-            serviceEventResult = new ServiceEventResult(serviceEvent);
-            serviceEventResult.setOriginalEventName(serviceEvent.getOriginalEventName());
-            serviceEventResult.setOriginalParameters(serviceEvent.getOriginalParameters());
-        }
-        return serviceEventResult;
     }
 
     private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
         ServiceEvent o = (ServiceEvent) ((ArrayList) serviceEvent.getParameters()[0]).get(0);
         eventInterestHolder.registerInterests(serviceEvent);
         if (o.getEventName().equals("com.akivaliaho.ConfigurationPollEventResult")) {
-            //Send an configHolderRoutingKey about every interest back to the configuration holder
-            configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
-            exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
+            sendPollResultToConfigModule(exchange, serviceEvent);
         } else if (configHolderRoutingKey != null && !configHolderRoutingKey.isEmpty()) {
             exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
         }
+    }
+
+    private void sendPollResultToConfigModule(Exchange exchange, ServiceEvent serviceEvent) {
+        //Send an configHolderRoutingKey about every interest back to the configuration holder
+        configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
+        exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
     }
 
 

@@ -15,7 +15,8 @@ public class FromMQRouteBuilder extends RouteBuilder {
     public FromMQRouteBuilder() {
         EventInterestHolder eventInterestHolder = new EventInterestHolder();
         ExchangeTools exchangeTools = new ExchangeTools();
-        this.exchangeToServiceEvent = new ExchangeToServiceEvent(eventInterestHolder, exchangeTools);
+        ProcessPreparator processPreparator = new ProcessPreparator(eventInterestHolder, exchangeTools);
+        this.exchangeToServiceEvent = new ExchangeToServiceEvent(eventInterestHolder, exchangeTools, processPreparator);
     }
 
     /**
