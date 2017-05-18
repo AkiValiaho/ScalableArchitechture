@@ -1,5 +1,6 @@
 package com.akivaliaho.amqp;
 
+import com.akivaliaho.ConfigurationPollEventResult;
 import com.akivaliaho.ServiceEvent;
 import com.akivaliaho.ServiceEventResult;
 import com.akivaliaho.config.ConfigEnum;
@@ -109,6 +110,11 @@ public class ESBRouter {
 
             public void handleMessage(ServiceEvent foo) {
                 log.info("Got message: {}", foo.getEventName());
+                //Is it a ConfigurationPollResult?
+                if (foo instanceof ConfigurationPollEventResult) {
+                    localEventDelegator.delegateEvent(foo);
+                    return;
+                }
                 //Is it a Result event?
                 if (foo.getEventName().toLowerCase().contains("result")) {
                     asyncQueue.solveResult(((ServiceEventResult) foo));

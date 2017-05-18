@@ -45,7 +45,7 @@ public class LocalEventDelegator {
                 invoke1.setOriginalParameters(parameters);
                 invoke1.setOriginalEventName(foo.getEventName());
                 eventUtil.publishEventResult(invoke1);
-            } else {
+            } else if (invoke instanceof ServiceEvent) {
                 eventUtil.publishEvent(invoke);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
