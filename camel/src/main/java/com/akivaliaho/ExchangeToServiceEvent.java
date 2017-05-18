@@ -6,7 +6,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by akivv on 24.4.2017.
@@ -27,13 +26,13 @@ public class ExchangeToServiceEvent implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        processPreparator.feedExchange(exchange).invoke();
-        List<String> interestedParties = processPreparator.getInterestedParties();
-        ServiceEventResult serviceEventResult = processPreparator.getServiceEventResult();
-        ServiceEvent serviceEvent = processPreparator.getServiceEvent();
-        handleDeclarationOfInterest(exchange, serviceEvent);
-        exchangeTools.sendToInterestedParties(interestedParties, serviceEventResult, exchange, serviceEvent);
-
+        PreProcessData preprocessData = processPreparator
+                .feedExchange(exchange)
+                .invoke()
+                .getPreprocessData();
+        handleDeclarationOfInterest(exchange, preprocessData.getServiceEvent());
+        exchangeTools.sendToInterestedParties(preprocessData, exchange
+        );
     }
 
     private void handleDeclarationOfInterest(Exchange exchange, ServiceEvent serviceEvent) {
