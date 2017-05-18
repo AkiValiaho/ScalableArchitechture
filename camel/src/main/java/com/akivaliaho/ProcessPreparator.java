@@ -14,6 +14,7 @@ public class ProcessPreparator {
     private ServiceEvent serviceEvent;
     private ServiceEventResult serviceEventResult;
     private List<String> interestedParties;
+    private Object preprocessData;
 
     public ProcessPreparator(EventInterestHolder eventInterestHolder, ExchangeTools exchangeTools) {
         this.eventInterestHolder = eventInterestHolder;
@@ -59,5 +60,12 @@ public class ProcessPreparator {
     public ProcessPreparator feedExchange(Exchange exchange) {
         this.exchange = exchange;
         return this;
+    }
+
+    public PreProcessData getPreprocessData() {
+        List<String> interestedParties = getInterestedParties();
+        ServiceEventResult serviceEventResult = getServiceEventResult();
+        ServiceEvent serviceEvent = getServiceEvent();
+        return new PreProcessData(interestedParties, serviceEventResult, serviceEvent);
     }
 }

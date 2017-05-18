@@ -7,6 +7,8 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Created by akivv on 18.5.2017.
  */
@@ -45,13 +47,29 @@ public class ExchangeTools {
 
     }
 
-    public void sendToInterestedParties(List<String> interestedParties, ServiceEventResult serviceEventResult, Exchange exchange, ServiceEvent serviceEvent) {
+    public void sendToInterestedParties(PreProcessData preProcessData, Exchange exchange) {
+        validatePreProcessData(preProcessData);
+        List<String> interestedParties = preProcessData.getInterestedParties();
+        ServiceEvent serviceEvent = preProcessData.getServiceEvent();
+        ServiceEventResult serviceEventResult = preProcessData.getServiceEventResult();
+        sendToParties(exchange, interestedParties, serviceEvent, serviceEventResult);
+    }
+
+    private void sendToParties(Exchange exchange, List<String> interestedParties, ServiceEvent serviceEvent, ServiceEventResult serviceEventResult) {
         if (interestedParties != null) {
             ServiceEventResult finalServiceEventResult = serviceEventResult;
             interestedParties
                     .forEach(event -> {
                         sendExchangeThroughTemplate(exchange, serviceEvent, finalServiceEventResult, event);
                     });
+        }
+    }
+
+    private void validatePreProcessData(PreProcessData preProcessData) {
+        checkNotNull(preProcessData.getInterestedParties());
+        if (preProcessData.getServiceEvent() == null) {
+            //then serviceEventResult should not be null
+            checkNotNull(preProcessData.getServiceEventResult());
         }
     }
 }
