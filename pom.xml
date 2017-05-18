@@ -19,5 +19,6 @@
         <module>communication</module>
         <module>camel</module>
         <module>stringtoolsservice</module>
+        <module>configurationmodule</module>
     </modules>
 </project>

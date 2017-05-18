@@ -10,10 +10,10 @@ import java.util.concurrent.Executor;
 
 @SpringBootApplication
 @EnableAsync
-public class ScalablegatewayApplication extends AsyncConfigurerSupport {
+public class ConfigurationApplication extends AsyncConfigurerSupport {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ScalablegatewayApplication.class, args);
+		SpringApplication.run(ConfigurationApplication.class, args);
 	}
 
 	@Override
@@ -21,7 +21,7 @@ public class ScalablegatewayApplication extends AsyncConfigurerSupport {
 		ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 		threadPoolTaskExecutor.setCorePoolSize(4);
 		threadPoolTaskExecutor.setMaxPoolSize(4);
-		threadPoolTaskExecutor.setThreadNamePrefix("GatewayServiceThread-");
+		threadPoolTaskExecutor.setThreadNamePrefix("ConfigurationApplicationThread-");
 		threadPoolTaskExecutor.initialize();
 		return threadPoolTaskExecutor;
 	}
