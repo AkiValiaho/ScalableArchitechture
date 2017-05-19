@@ -30,15 +30,18 @@ public class ExchangeToServiceEvent implements Processor {
                 .feedExchange(exchange)
                 .invoke()
                 .getPreprocessData();
-        handleDeclarationOfInterest(exchange, preprocessData.getServiceEvent());
-        exchangeTools.sendToInterestedParties(preprocessData, exchange
-        );
+        if (!handleDeclarationOfInterest(exchange, preprocessData.getServiceEvent())) {
+            exchangeTools.sendToInterestedParties(preprocessData, exchange
+            );
+        }
     }
 
-    private void handleDeclarationOfInterest(Exchange exchange, ServiceEvent serviceEvent) {
+    private boolean handleDeclarationOfInterest(Exchange exchange, ServiceEvent serviceEvent) {
         if (serviceEvent.getEventName().equals("declarationOfInterests")) {
             registerInterests(exchange, serviceEvent);
+            return true;
         }
+        return false;
     }
 
     private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
