@@ -22,23 +22,31 @@ public class ExchangeTools {
     void sendExchangeThroughTemplate(Exchange exchange, ServiceEvent serviceEvent, ServiceEventResult finalServiceEventResult, String event) {
         //Send all the events through the producer template
         try {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            if (finalServiceEventResult != null) {
-                objectOutputStream.writeObject(finalServiceEventResult);
-            } else {
-                objectOutputStream.writeObject(serviceEvent);
-            }
-            objectOutputStream.flush();
-            byte[] bytes = byteArrayOutputStream.toByteArray();
-            exchange.getIn().setBody(bytes);
-            exchange.getIn().setHeader("routingKey", event);
-            exchange.getIn().setHeader(RabbitMQConstants.EXCHANGE_NAME, exchange.getIn().getHeader("routingKey"));
-            exchange.getIn().setHeader(RabbitMQConstants.ROUTING_KEY, "");
-            exchange.getContext().createProducerTemplate().send("direct:fromESB", exchange);
+            byte[] bytes = getBytes(serviceEvent, finalServiceEventResult);
+            sendExchangeWithProducerTemplate(exchange, event, bytes);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private byte[] getBytes(ServiceEvent serviceEvent, ServiceEventResult finalServiceEventResult) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        if (finalServiceEventResult != null) {
+            objectOutputStream.writeObject(finalServiceEventResult);
+        } else {
+            objectOutputStream.writeObject(serviceEvent);
+        }
+        objectOutputStream.flush();
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    private void sendExchangeWithProducerTemplate(Exchange exchange, String event, byte[] bytes) {
+        exchange.getIn().setBody(bytes);
+        exchange.getIn().setHeader("routingKey", event);
+        exchange.getIn().setHeader(RabbitMQConstants.EXCHANGE_NAME, exchange.getIn().getHeader("routingKey"));
+        exchange.getIn().setHeader(RabbitMQConstants.ROUTING_KEY, "");
+        exchange.getContext().createProducerTemplate().send("direct:fromESB", exchange);
     }
 
     public void sendPollResult(HashMap<ServiceEvent, List<String>> eventInterestMap, Exchange exchange, String event) {
