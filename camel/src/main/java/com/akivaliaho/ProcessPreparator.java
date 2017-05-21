@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class ProcessPreparator {
     private final EventInterestHolder eventInterestHolder;
     private final ExchangeTools exchangeTools;
@@ -58,6 +60,7 @@ public class ProcessPreparator {
     }
 
     public ProcessPreparator feedExchange(Exchange exchange) {
+        checkNotNull(exchange);
         this.exchange = exchange;
         return this;
     }
