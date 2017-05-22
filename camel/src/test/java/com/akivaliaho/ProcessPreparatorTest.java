@@ -1,6 +1,6 @@
 package com.akivaliaho;
 
-import com.akivaliaho.event.EventInterestHolder;
+import com.akivaliaho.event.EventInterestRegistrer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -22,14 +22,14 @@ import static org.mockito.Mockito.when;
  */
 public class ProcessPreparatorTest {
     private ProcessPreparator processPreparator;
-    private EventInterestHolder eventInterestHolderMock;
+    private EventInterestRegistrer eventInterestRegistrerMock;
     private ExchangeTools exchangeToolsMock;
 
     @Before
     public void initTest() {
-        eventInterestHolderMock = mock(EventInterestHolder.class);
+        eventInterestRegistrerMock = mock(EventInterestRegistrer.class);
         exchangeToolsMock = mock(ExchangeTools.class);
-        this.processPreparator = new ProcessPreparator(eventInterestHolderMock, exchangeToolsMock);
+        this.processPreparator = new ProcessPreparator(eventInterestRegistrerMock, exchangeToolsMock);
     }
 
     @org.junit.Test
@@ -59,7 +59,7 @@ public class ProcessPreparatorTest {
         when(exchangeToolsMock.feedOutputStream(any())).thenReturn(objectInputStream);
         List<String> interestList = new ArrayList<>();
         interestList.add(randomEvent.getEventName());
-        when(eventInterestHolderMock.getInterestedParties(any())).thenReturn(interestList);
+        when(eventInterestRegistrerMock.getInterestedParties(any())).thenReturn(interestList);
         ProcessPreparator invoke = processPreparator.invoke();
         List<String> interestedParties = invoke.getInterestedParties();
         ServiceEvent serviceEvent = invoke.getServiceEvent();

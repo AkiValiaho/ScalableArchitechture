@@ -1,6 +1,7 @@
 package com.akivaliaho;
 
-import com.akivaliaho.event.EventInterestHolder;
+import com.akivaliaho.event.EventAndRoutingKeyHolder;
+import com.akivaliaho.event.EventInterestRegistrer;
 import org.apache.camel.builder.RouteBuilder;
 
 import java.io.IOException;
@@ -13,10 +14,11 @@ public class FromMQRouteBuilder extends RouteBuilder {
     private ExchangeToServiceEvent exchangeToServiceEvent;
 
     public FromMQRouteBuilder() {
-        EventInterestHolder eventInterestHolder = new EventInterestHolder();
+        EventAndRoutingKeyHolder eventAndRoutingKeyHolder = new EventAndRoutingKeyHolder();
+        EventInterestRegistrer eventInterestRegistrer = new EventInterestRegistrer(eventAndRoutingKeyHolder);
         ExchangeTools exchangeTools = new ExchangeTools();
-        ProcessPreparator processPreparator = new ProcessPreparator(eventInterestHolder, exchangeTools);
-        this.exchangeToServiceEvent = new ExchangeToServiceEvent(eventInterestHolder, exchangeTools, processPreparator);
+        ProcessPreparator processPreparator = new ProcessPreparator(eventInterestRegistrer, exchangeTools);
+        this.exchangeToServiceEvent = new ExchangeToServiceEvent(eventInterestRegistrer, exchangeTools, processPreparator);
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.akivaliaho;
 
-import com.akivaliaho.event.EventInterestHolder;
+import com.akivaliaho.event.EventInterestRegistrer;
 import org.apache.camel.Exchange;
 
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ProcessPreparator {
-    private final EventInterestHolder eventInterestHolder;
+    private final EventInterestRegistrer eventInterestRegistrer;
     private final ExchangeTools exchangeTools;
     private Exchange exchange;
     private ServiceEvent serviceEvent;
@@ -18,8 +18,8 @@ public class ProcessPreparator {
     private List<String> interestedParties;
     private Object preprocessData;
 
-    public ProcessPreparator(EventInterestHolder eventInterestHolder, ExchangeTools exchangeTools) {
-        this.eventInterestHolder = eventInterestHolder;
+    public ProcessPreparator(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools) {
+        this.eventInterestRegistrer = eventInterestRegistrer;
         this.exchangeTools = exchangeTools;
     }
 
@@ -38,7 +38,7 @@ public class ProcessPreparator {
     public ProcessPreparator invoke() throws IOException, ClassNotFoundException {
         serviceEvent = convertExchangeToServiceEvent(exchange);
         serviceEventResult = parseServiceEventResultIfNeeded(serviceEvent);
-        interestedParties = eventInterestHolder.getInterestedParties(serviceEvent);
+        interestedParties = eventInterestRegistrer.getInterestedParties(serviceEvent);
         return this;
     }
 

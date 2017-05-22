@@ -3,8 +3,6 @@ package com.akivaliaho.event;
 import com.akivaliaho.ServiceEvent;
 import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,44 +14,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by vagrant on 4/28/17.
  */
-public class EventInterestHolder {
-    @Getter
-    @Setter
-    private HashMap<ServiceEvent, List<String>> eventInterestMap;
+public class EventInterestRegistrer {
+    private final EventAndRoutingKeyHolder eventAndRoutingKeyHolder;
 
-    public EventInterestHolder() {
-        this.eventInterestMap = new HashMap<>();
+
+    public EventInterestRegistrer(EventAndRoutingKeyHolder eventAndRoutingKeyHolder) {
+        this.eventAndRoutingKeyHolder = eventAndRoutingKeyHolder;
     }
 
     public List<String> getInterestedParties(ServiceEvent serviceEvent) {
-        return eventInterestMap.get(serviceEvent);
+        return eventAndRoutingKeyHolder.get(serviceEvent);
     }
 
     public void registerInterests(ServiceEvent serviceEvent) {
         checkRegisterInterestsPreconditions(serviceEvent);
         List<ServiceEvent> serviceEventList = (List<ServiceEvent>) serviceEvent.getParameters()[0];
+        //Number 1 is the routing key parameter
         String serviceRoutingKey = (String) serviceEvent.getEventParams().getParams()[1];
         serviceEventList.stream()
                 .forEach(event -> {
-                    if (eventInterestMap.containsKey(event)) {
-                        addRoutingkeyToExistingEvent(serviceRoutingKey, event);
-                    } else {
-                        createNewEventAndRoutingKey(serviceRoutingKey, event);
-                    }
+                    eventAndRoutingKeyHolder.handleEvent(event, serviceRoutingKey);
                 });
-    }
-
-    private void createNewEventAndRoutingKey(String serviceRoutingKey, ServiceEvent event) {
-        ArrayList<String> strings = new ArrayList<>();
-        strings.add(serviceRoutingKey);
-        eventInterestMap.put(event, strings);
-    }
-
-    private void addRoutingkeyToExistingEvent(String serviceRoutingKey, ServiceEvent event) {
-        List<String> strings = eventInterestMap.get(event);
-        if (!strings.contains(serviceRoutingKey)) {
-            strings.add(serviceRoutingKey);
-        }
     }
 
     private void checkRegisterInterestsPreconditions(ServiceEvent serviceEvent) {
@@ -70,5 +51,9 @@ public class EventInterestHolder {
         } else {
             throw new IllegalArgumentException("No arguments given for the interest event");
         }
+    }
+
+    public HashMap<ServiceEvent, List<String>> getEventInterestMap() {
+        return eventAndRoutingKeyHolder.getEventInterestMap();
     }
 }

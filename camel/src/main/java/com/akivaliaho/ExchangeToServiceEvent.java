@@ -1,6 +1,6 @@
 package com.akivaliaho;
 
-import com.akivaliaho.event.EventInterestHolder;
+import com.akivaliaho.event.EventInterestRegistrer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -12,13 +12,13 @@ import java.util.ArrayList;
  */
 @Slf4j
 public class ExchangeToServiceEvent implements Processor {
-    private final EventInterestHolder eventInterestHolder;
+    private final EventInterestRegistrer eventInterestRegistrer;
     private final ExchangeTools exchangeTools;
     private final ProcessPreparator processPreparator;
     private String configHolderRoutingKey;
 
-    public ExchangeToServiceEvent(EventInterestHolder eventInterestHolder, ExchangeTools exchangeTools, ProcessPreparator processPreparator) {
-        this.eventInterestHolder = eventInterestHolder;
+    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools, ProcessPreparator processPreparator) {
+        this.eventInterestRegistrer = eventInterestRegistrer;
         this.exchangeTools = exchangeTools;
         this.processPreparator = processPreparator;
         //TODO On-init connection to ConfigurationHolder
@@ -46,18 +46,19 @@ public class ExchangeToServiceEvent implements Processor {
 
     private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
         ServiceEvent o = (ServiceEvent) ((ArrayList) serviceEvent.getParameters()[0]).get(0);
-        eventInterestHolder.registerInterests(serviceEvent);
+        eventInterestRegistrer.registerInterests(serviceEvent);
         if (o.getEventName().equals("com.akivaliaho.ConfigurationPollEventResult")) {
             sendPollResultToConfigModule(exchange, serviceEvent);
         } else if (configHolderRoutingKey != null && !configHolderRoutingKey.isEmpty()) {
-            exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
+            exchangeTools.sendPollResult(eventInterestRegistrer.getEventInterestMap(), exchange, configHolderRoutingKey);
         }
     }
 
     private void sendPollResultToConfigModule(Exchange exchange, ServiceEvent serviceEvent) {
         //Send an configHolderRoutingKey about every interest back to the configuration holder
         configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
-        exchangeTools.sendPollResult(eventInterestHolder.getEventInterestMap(), exchange, configHolderRoutingKey);
+        //TODO Rethink this a bit, transitive access of a class, not good design
+        exchangeTools.sendPollResult(eventInterestRegistrer.getEventInterestMap(), exchange, configHolderRoutingKey);
     }
 
 
