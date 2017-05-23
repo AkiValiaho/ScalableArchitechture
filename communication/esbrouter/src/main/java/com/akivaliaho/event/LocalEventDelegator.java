@@ -19,42 +19,42 @@ import java.util.Map;
 @Component
 @Slf4j
 public class LocalEventDelegator {
-    ApplicationContext applicationContext;
-    private Map<String, Method> interestMap;
+	ApplicationContext applicationContext;
+	private Map<String, Method> interestMap;
 
 
-    @Setter
-    private EventUtil eventUtil;
+	@Setter
+	private EventUtil eventUtil;
 
-    @Autowired
-    public LocalEventDelegator(ApplicationContext ctx) {
-        this.applicationContext = ctx;
-    }
+	@Autowired
+	public LocalEventDelegator(ApplicationContext ctx) {
+		this.applicationContext = ctx;
+	}
 
 
-    public void delegateEvent(ServiceEvent foo) {
-        Method method = interestMap.get(foo.getEventName());
-        //TODO Delegate event to proper event handler
-        Object[] parameters = foo.getParameters();
-        try {
-            Object bean = applicationContext.getBean(method.getDeclaringClass());
-            ServiceEvent invoke = (ServiceEvent) method.invoke(bean, parameters);
-            log.debug("Got event as a result of computation: {}", invoke);
-            if (invoke instanceof ServiceEventResult) {
-                ServiceEventResult invoke1 = (ServiceEventResult) invoke;
-                invoke1.setOriginalParameters(parameters);
-                invoke1.setOriginalEventName(foo.getEventName());
-                eventUtil.publishEventResult(invoke1);
-            } else if (invoke instanceof ServiceEvent) {
-                eventUtil.publishEvent(invoke);
-            }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-    }
+	public void delegateEvent(ServiceEvent foo) {
+		Method method = interestMap.get(foo.getEventName());
+		//TODO Delegate event to proper event handler
+		Object[] parameters = foo.getParameters();
+		try {
+			Object bean = applicationContext.getBean(method.getDeclaringClass());
+			ServiceEvent invoke = (ServiceEvent) method.invoke(bean, parameters);
+			log.debug("Got event as a result of computation: {}", invoke);
+			if (invoke instanceof ServiceEventResult) {
+				ServiceEventResult invoke1 = (ServiceEventResult) invoke;
+				invoke1.setOriginalParameters(parameters);
+				invoke1.setOriginalEventName(foo.getEventName());
+				eventUtil.publishEventResult(invoke1);
+			} else if (invoke instanceof ServiceEvent) {
+				eventUtil.publishEvent(invoke);
+			}
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
 
-    public void pluginInterests(Map<String, Method> interestMap) {
-        this.interestMap = interestMap;
-    }
+	public void pluginInterests(Map<String, Method> interestMap) {
+		this.interestMap = interestMap;
+	}
 
 }
