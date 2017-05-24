@@ -59,9 +59,9 @@ public class ESBRouter {
         // set up the queue, exchange, binding on the broker
         RabbitAdmin admin = new RabbitAdmin(connectionFactory);
         //Declare dedicated serviceQueue and toESBQueue
-        Queue serviceQueue = new Queue(messagingConfiguration.get(ConfigEnum.SERVICEQUEUE));
+        Queue serviceQueue = new Queue(messagingConfiguration.get(ConfigEnum.SERVICEQUEUE), true);
         admin.declareQueue(serviceQueue);
-        Queue toESBQueue = new Queue(messagingConfiguration.get(ConfigEnum.MQ_TO_ESB_QUEUE));
+        Queue toESBQueue = new Queue(messagingConfiguration.get(ConfigEnum.MQ_TO_ESB_QUEUE), true);
         mq_from_esb_exchange = new FanoutExchange(messagingConfiguration.get(ConfigEnum.MQ_FROM_ESB_ESCHANGE), true, false);
         mq_to_esb_exchange = new TopicExchange(messagingConfiguration.get(ConfigEnum.MQ_TO_ESB_EXCHANGE), true, false);
         bindingsInit(messagingConfiguration, admin, serviceQueue, toESBQueue);
