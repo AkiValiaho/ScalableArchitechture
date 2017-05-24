@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by akivv on 6.5.2017.
@@ -22,15 +23,22 @@ public class IntegrationTestHarness {
         return "java -jar " + s;
     }
 
+    public void startCoreServicesAnd(String[] servicesToStart) {
+        //TODO
+    }
+
+
     public void startServices() {
         Runtime runtime = Runtime.getRuntime();
         executorService = Executors.newCachedThreadPool();
-        //TODO Implement a generic solution for this
         String property = System.getProperty("user.dir");
         File file = new File(property);
         property = file.getParent();
         //Traverse the directory structure to find the runnable jars
         List<String> runnables = traversePath(property);
+        log.debug("Number of runnables to start: {}", runnables.size());
+        runnables.forEach(s -> log.debug("Starting runnable: {}", s));
+        AtomicInteger readyRunnables = new AtomicInteger(0);
         runnables.parallelStream().map(this::addCommand)
                 .forEach(cmd -> {
                     try {
@@ -43,21 +51,27 @@ public class IntegrationTestHarness {
                                 try {
                                     while ((line = bufferedReader.readLine()) != null) {
                                         log.info(line);
+                                        if (line.contains("Started") || (line.contains("Apache Camel 2.18.3") && line.contains("started"))) {
+                                            readyRunnables.incrementAndGet();
+                                        }
                                     }
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             });
-                            try {
-                                exec.waitFor();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 });
+        while (readyRunnables.get() != runnables.size()) {
+            log.debug("Runnables not ready yet, number of runnables ready: {}", readyRunnables.get());
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -85,7 +99,7 @@ public class IntegrationTestHarness {
     }
 
     private boolean notInFilters(String name) {
-        String[] forbiddenNames = {"original", "communication", "configurator", "esbrouter", "scalablegateway"};
+        String[] forbiddenNames = {"original", "communication", "surefire", "events", "configurator", "esbrouter", "scalablegateway"};
         for (int i = 0; i < forbiddenNames.length; i++) {
             if (name.contains(forbiddenNames[i])) {
                 return false;
