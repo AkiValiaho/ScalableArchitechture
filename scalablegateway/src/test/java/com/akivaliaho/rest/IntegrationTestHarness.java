@@ -2,12 +2,11 @@ package com.akivaliaho.rest;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by akivv on 6.5.2017.
@@ -15,13 +14,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class IntegrationTestHarness {
 
+    private final RunnableTools runnableTools;
     private ExecutorService executorService;
-    private List<Process> registeredProcesses;
 
-    public String addCommand(String s) {
-        //TODO Fix command execution order, OR CREATE A DEDICATED configuration holder to decouple everything
-        //Basic execution of runnable jar with -jar switch
-        return "java -jar " + s;
+    public IntegrationTestHarness() {
+        this.runnableTools = new RunnableTools();
     }
 
     public void startCoreServicesAnd(String[] servicesToStart) {
@@ -31,62 +28,32 @@ public class IntegrationTestHarness {
 
     public void startServices() {
         //TODO Refactor this horror
-        registeredProcesses = new ArrayList<Process>();
         Runtime runtime = Runtime.getRuntime();
         executorService = Executors.newCachedThreadPool();
+        String property = getRootDir();
+        //Traverse the directory structure to find the runnable jars
+        List<String> runnables = findRunnables(property);
+        log.debug("Number of runnables to start: {}", runnables.size());
+        runnables.forEach(s -> log.debug("Starting runnable: {}", s));
+        runnableTools.startRunnables(runnables, runtime);
+
+    }
+
+    private String getRootDir() {
         String property = System.getProperty("user.dir");
         File file = new File(property);
         property = file.getParent();
-        //Traverse the directory structure to find the runnable jars
-        List<String> runnables = traversePath(property);
-        log.debug("Number of runnables to start: {}", runnables.size());
-        runnables.forEach(s -> log.debug("Starting runnable: {}", s));
-        AtomicInteger readyRunnables = new AtomicInteger(0);
-        runnables.parallelStream().map(this::addCommand)
-                .forEach(cmd -> {
-                    try {
-                        Process exec = runtime.exec(cmd);
-                        registeredProcesses.add(exec);
-                        executorService.submit(() -> {
-                            executorService.submit(() -> {
-                                InputStream inputStream = exec.getInputStream();
-                                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                                String line;
-                                try {
-                                    while ((line = bufferedReader.readLine()) != null) {
-                                        log.info(line);
-                                        if (line.contains("Started") || (line.contains("Apache Camel 2.18.3") && line.contains("started"))) {
-                                            readyRunnables.incrementAndGet();
-                                        }
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            });
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-        while (readyRunnables.get() != runnables.size()) {
-            log.debug("Runnables not ready yet, number of runnables ready: {}", readyRunnables.get());
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        return property;
     }
 
-
-    private List<String> traversePath(String property) {
+    private List<String> findRunnables(String property) {
         File starter = new File(property);
         List<String> jars = new ArrayList<>();
-        traversePath(starter, jars);
+        findRunnables(starter, jars);
         return jars;
     }
 
-    private void traversePath(File starter, List<String> jars) {
+    private void findRunnables(File starter, List<String> jars) {
         if (starter.isDirectory()) {
             File[] files = starter.listFiles();
             Boolean hasADirectory = false;
@@ -96,7 +63,7 @@ public class IntegrationTestHarness {
                     jars.add(file.getAbsolutePath());
                     //Get rid of all those .-folders in the recursion
                 } else if (file.isDirectory() && !file.isHidden()) {
-                    traversePath(file, jars);
+                    findRunnables(file, jars);
                 }
             }
         }
@@ -113,8 +80,6 @@ public class IntegrationTestHarness {
     }
 
     public void stopServices() {
-        registeredProcesses.stream()
-                .forEach(process -> process.destroyForcibly()
-                );
+        runnableTools.destroyProcesses();
     }
 }
