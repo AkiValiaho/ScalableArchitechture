@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class IntegrationTestHarness {
 
     private ExecutorService executorService;
+    private List<Process> registeredProcesses;
 
     public String addCommand(String s) {
         //TODO Fix command execution order, OR CREATE A DEDICATED configuration holder to decouple everything
@@ -29,6 +30,8 @@ public class IntegrationTestHarness {
 
 
     public void startServices() {
+        //TODO Refactor this horror
+        registeredProcesses = new ArrayList<Process>();
         Runtime runtime = Runtime.getRuntime();
         executorService = Executors.newCachedThreadPool();
         String property = System.getProperty("user.dir");
@@ -43,6 +46,7 @@ public class IntegrationTestHarness {
                 .forEach(cmd -> {
                     try {
                         Process exec = runtime.exec(cmd);
+                        registeredProcesses.add(exec);
                         executorService.submit(() -> {
                             executorService.submit(() -> {
                                 InputStream inputStream = exec.getInputStream();
@@ -109,6 +113,8 @@ public class IntegrationTestHarness {
     }
 
     public void stopServices() {
-        executorService.shutdownNow();
+        registeredProcesses.stream()
+                .forEach(process -> process.destroyForcibly()
+                );
     }
 }

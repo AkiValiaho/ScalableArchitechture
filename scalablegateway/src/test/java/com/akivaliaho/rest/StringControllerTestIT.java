@@ -21,11 +21,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Created by akivv on 5.5.2017.
+ * Created by akivv on 27.5.2017.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class CalculationsControllerTestIT {
+public class StringControllerTestIT {
     private static IntegrationTestHarness testHarness;
     @Autowired
     WebApplicationContext webApplicationContext;
@@ -49,21 +49,15 @@ public class CalculationsControllerTestIT {
     }
 
     @Test
-    public void doHardCalculation() throws Exception {
-        MultiValueMap<String, String> numberMap = new LinkedMultiValueMap<>();
-        numberMap.add("number1", "5");
-        numberMap.add("number32", "6");
-        MvcResult perform = mockMvc.perform(post("/api/doSuperHardCalculation").params(numberMap))
-                .andReturn();
-        MvcResult mvcResult = mockMvc.perform(asyncDispatch(perform))
+    public void testStringAppender() throws Exception {
+        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
+        multiValueMap.add("one", "asdf");
+        multiValueMap.add("two", "fdsa");
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/appendStrings").params(multiValueMap)).andReturn();
+        MvcResult mvcResult1 = mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk()).andReturn();
-        String contentAsString = mvcResult.getResponse().getContentAsString();
-        assertEquals(contentAsString, "11");
+        String contentAsString = mvcResult1.getResponse().getContentAsString();
+        assertEquals("asdffdsa", contentAsString);
     }
-
-
-    @Test
-    public void doSuperHardCalculation() throws Exception {
-    }
-
 }
