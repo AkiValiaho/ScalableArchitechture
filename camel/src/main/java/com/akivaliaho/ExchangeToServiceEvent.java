@@ -60,6 +60,4 @@ public class ExchangeToServiceEvent implements Processor {
         //TODO Rethink this a bit, transitive access of a class, not good design
         exchangeTools.sendPollResult(eventInterestRegistrer.getEventInterestMap(), exchange, configHolderRoutingKey);
     }
-
-
 }

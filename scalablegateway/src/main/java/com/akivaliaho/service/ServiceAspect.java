@@ -59,7 +59,7 @@ public class ServiceAspect {
         try {
             Method invokedMethod = parseMethod(invokedMethodName, proceedingJoinPoint.getSignature().getDeclaringType(), parseArgTypes(proceedingJoinPoint.getArgs()));
             Interest annotation = getAnnotation(invokedMethod);
-            DeferredResult<V> deferredresult = new DeferredResult<V>(TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS));
+            DeferredResult<V> deferredresult = new DeferredResult<V>(TimeUnit.MILLISECONDS.convert(300, TimeUnit.SECONDS));
             asyncQueue.addWaitingResult(deferredresult, proceedingJoinPoint.getArgs(), annotation.emit().getName());
             threadPoolTaskExecutor.execute(() -> {
                 ServiceEvent invoke = null;

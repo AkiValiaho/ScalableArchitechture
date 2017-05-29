@@ -1,6 +1,7 @@
 package com.akivaliaho.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
@@ -9,31 +10,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by akivv on 6.5.2017.
  */
 @Slf4j
+@Component
 public class IntegrationTestHarness extends AbstractTestExecutionListener {
 
-    private final RunnableTools runnableTools;
+    private RunnableTools runnableTools;
     private ExecutorService executorService;
+    private AtomicBoolean servicesStarted;
 
     public IntegrationTestHarness() {
         this.runnableTools = new RunnableTools();
+        this.servicesStarted = new AtomicBoolean(false);
     }
 
     @Override
     public void afterTestClass(TestContext testContext) throws Exception {
-        super.afterTestClass(testContext);
-        //Close all the services
         stopServices();
+        //Close all the services
+        super.afterTestClass(testContext);
     }
 
     @Override
     public void beforeTestClass(TestContext testContext) throws Exception {
-        super.beforeTestClass(testContext);
         startServices();
+        super.beforeTestClass(testContext);
     }
 
     public void startCoreServicesAnd(String[] servicesToStart) {
@@ -42,6 +47,7 @@ public class IntegrationTestHarness extends AbstractTestExecutionListener {
 
 
     public void startServices() {
+        servicesStarted.set(true);
         Runtime runtime = Runtime.getRuntime();
         executorService = Executors.newCachedThreadPool();
         String property = getRootDir();
@@ -95,5 +101,12 @@ public class IntegrationTestHarness extends AbstractTestExecutionListener {
 
     public void stopServices() {
         runnableTools.destroyProcesses();
+        servicesStarted.set(false);
+    }
+
+    public void startServicesIfNotOn() {
+        if (!servicesStarted.get()) {
+            startServices();
+        }
     }
 }

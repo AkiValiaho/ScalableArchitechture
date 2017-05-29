@@ -46,10 +46,19 @@ public class EventInterestRegistrer {
         List<ServiceEvent> serviceEventList = (List<ServiceEvent>) serviceEvent.getParameters()[0];
         //Number 1 is the routing key parameter
         String serviceRoutingKey = (String) serviceEvent.getEventParams().getParams()[1];
+        log.info("Registering events: {} to routing key: {}", concatEvents(serviceEventList), serviceRoutingKey);
         serviceEventList.stream()
                 .forEach(event -> {
                     eventAndRoutingKeyHolder.handleEvent(event, serviceRoutingKey);
                 });
+    }
+
+    private String concatEvents(List<ServiceEvent> serviceEventList) {
+        StringBuilder builder = new StringBuilder();
+        serviceEventList.stream()
+                .forEach(serviceEvent -> builder.append(serviceEvent.getEventName() + " "));
+        return builder.toString();
+
     }
 
     private void checkRegisterInterestsPreconditions(ServiceEvent serviceEvent) {
