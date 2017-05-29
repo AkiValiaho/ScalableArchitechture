@@ -1,6 +1,8 @@
 package com.akivaliaho.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import java.util.concurrent.Executors;
  * Created by akivv on 6.5.2017.
  */
 @Slf4j
-public class IntegrationTestHarness {
+public class IntegrationTestHarness extends AbstractTestExecutionListener {
 
     private final RunnableTools runnableTools;
     private ExecutorService executorService;
@@ -21,13 +23,25 @@ public class IntegrationTestHarness {
         this.runnableTools = new RunnableTools();
     }
 
+    @Override
+    public void afterTestClass(TestContext testContext) throws Exception {
+        super.afterTestClass(testContext);
+        //Close all the services
+        stopServices();
+    }
+
+    @Override
+    public void beforeTestClass(TestContext testContext) throws Exception {
+        super.beforeTestClass(testContext);
+        startServices();
+    }
+
     public void startCoreServicesAnd(String[] servicesToStart) {
         //TODO
     }
 
 
     public void startServices() {
-        //TODO Refactor this horror
         Runtime runtime = Runtime.getRuntime();
         executorService = Executors.newCachedThreadPool();
         String property = getRootDir();

@@ -3,6 +3,7 @@ package com.akivaliaho.event;
 import com.akivaliaho.ServiceEvent;
 import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by vagrant on 4/28/17.
  */
+@Slf4j
 public class EventInterestRegistrer {
     private final EventAndRoutingKeyHolder eventAndRoutingKeyHolder;
 
@@ -23,7 +25,20 @@ public class EventInterestRegistrer {
     }
 
     public List<String> getInterestedParties(ServiceEvent serviceEvent) {
-        return eventAndRoutingKeyHolder.get(serviceEvent);
+        if (!serviceEvent.getEventName().equals("declarationOfInterests")) {
+            log.info("Trying to get interested parties with service event: {}", serviceEvent.getEventName());
+            List<String> strings = eventAndRoutingKeyHolder.get(serviceEvent);
+            if (strings == null || strings.isEmpty()) {
+                //Wait for a few seconds
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return strings;
+        }
+        return null;
     }
 
     public void registerInterests(ServiceEvent serviceEvent) {

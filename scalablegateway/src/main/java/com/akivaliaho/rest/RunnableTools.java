@@ -25,6 +25,9 @@ public class RunnableTools {
 
     public String addCommand(String s) {
         //Basic execution of runnable jar with -jar switch
+        if (s.contains("camel")) {
+            return "java -agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n -jar " + s;
+        }
         return "java -jar " + s;
     }
 
@@ -77,12 +80,22 @@ public class RunnableTools {
                 e.printStackTrace();
             }
         }
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void destroyProcesses() {
         this.runnableHolder.getRegisteredProcesses()
                 .stream()
-                .forEach(process -> process.destroyForcibly()
+                .forEach(process -> {
+                            process.destroyForcibly();
+                            while (process.isAlive()) {
+
+                            }
+                        }
                 );
     }
 }
