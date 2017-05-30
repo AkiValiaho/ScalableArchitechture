@@ -9,6 +9,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Created by vagrant on 5/2/17.
  */
@@ -39,7 +41,7 @@ public class AsyncQueue {
     }
 
     public void solveResult(ServiceEventResult foo) {
-        //TODO Write some tests to validate this brittle piece of logic
+        checkNasties(foo);
         log.debug("Got ServiceEvent: {}", foo);
         Object[] originalParameters = foo.getOriginalParameters();
         Params param = new Params(originalParameters);
@@ -51,6 +53,10 @@ public class AsyncQueue {
             //Remove from the list
             deferredResults.remove(deferredResults.size() - 1);
         }
+    }
+
+    private void checkNasties(ServiceEventResult serviceEventResult) {
+        checkNotNull(serviceEventResult.getOriginalParameters());
     }
 }
 

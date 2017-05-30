@@ -1,5 +1,7 @@
 package com.akivaliaho.event;
 
+import com.akivaliaho.AppendStringsEventResult;
+import com.akivaliaho.ServiceEventResult;
 import mockit.Deencapsulation;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,8 +77,10 @@ public class AsyncQueueTest {
         assertTrue(deferredResults1.size() == 1);
     }
 
-    @Test
-    public void solveTestResult() {
+    @Test(expected = NullPointerException.class)
+    public void solveTestResultEventNotFound() {
+        ServiceEventResult serviceEventResult = new AppendStringsEventResult("asdf");
+        this.asyncQueue.solveResult(serviceEventResult);
 
     }
 }
