@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * Created by akivv on 6.5.2017.
@@ -42,7 +43,24 @@ public class IntegrationTestHarness extends AbstractTestExecutionListener {
     }
 
     public void startCoreServicesAnd(String[] servicesToStart) {
-        //TODO
+        servicesStarted.set(true);
+        Runtime runtime = Runtime.getRuntime();
+        executorService = Executors.newCachedThreadPool();
+        String property = getRootDir();
+        //Traverse the directory structure to find the runnable jars
+        List<String> runnables = findRunnables(property);
+        List<String> collect = runnables.stream()
+                .filter(runnable -> {
+                    for (String s : servicesToStart) {
+                        if (runnable.toLowerCase().contains(s.toLowerCase()) || runnable.contains("configuration") || runnable.contains("camel")) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }).collect(Collectors.toList());
+        log.debug("Number of runnables to start: {}", collect.size());
+        collect.forEach(s -> log.debug("Starting runnable: {}", s));
+        runnableTools.startRunnables(collect, runtime);
     }
 
 
@@ -107,6 +125,12 @@ public class IntegrationTestHarness extends AbstractTestExecutionListener {
     public void startServicesIfNotOn() {
         if (!servicesStarted.get()) {
             startServices();
+        }
+    }
+
+    public void startServicesIfNotOn(String[] strings) {
+        if (!servicesStarted.get()) {
+            startCoreServicesAnd(strings);
         }
     }
 }

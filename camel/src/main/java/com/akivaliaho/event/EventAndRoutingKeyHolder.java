@@ -28,8 +28,6 @@ public class EventAndRoutingKeyHolder {
 
     public void handleEvent(ServiceEvent event, String serviceRoutingKey) {
         checkNasties(event, serviceRoutingKey);
-        //TODO Test the functionality of this class and check the parameters for
-        //nasties.
         log.debug("registering routing key {} to event {}", serviceRoutingKey, event);
         if (eventInterestMap.containsKey(event)) {
             addRoutingkeyToExistingEvent(serviceRoutingKey, event);
@@ -44,14 +42,12 @@ public class EventAndRoutingKeyHolder {
     }
 
     private void createNewEventAndRoutingKey(String serviceRoutingKey, ServiceEvent event) {
-        //TODO Test these
         ArrayList<String> strings = new ArrayList<>();
         strings.add(serviceRoutingKey);
         eventInterestMap.put(event, strings);
     }
 
     private void addRoutingkeyToExistingEvent(String serviceRoutingKey, ServiceEvent event) {
-        //TODO Test these
         List<String> strings = eventInterestMap.get(event);
         if (!strings.contains(serviceRoutingKey)) {
             strings.add(serviceRoutingKey);

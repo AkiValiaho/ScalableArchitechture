@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(IntegrationTestRunner.class)
 @SpringBootTest
+@ServicesToStart(servicesToStart = {"calculatorService"})
 public class CalculationsControllerTestIT {
     @Autowired
     WebApplicationContext webApplicationContext;
