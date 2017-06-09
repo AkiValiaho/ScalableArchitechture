@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class StringTool {
 
 
-    @Interest(value = AppendStringsEvent.class)
+    @Interest(receives = AppendStringsEvent.class)
     public AppendStringsEventResult stringAppend(String a, String b) {
         return new AppendStringsEventResult(a + b);
     }

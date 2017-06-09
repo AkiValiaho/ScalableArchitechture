@@ -12,12 +12,12 @@ import org.springframework.web.context.request.async.DeferredResult;
  */
 @Service
 public class CalculationService {
-    @Interest(emit = CalculateHardSumEvent.class)
+    @Interest(emits = CalculateHardSumEvent.class)
     public DeferredResult<Integer> doHardCalculation(Integer number1, Integer number2) {
         return null;
     }
 
-    @Interest(value = CalculateSuperHardSumResultEvent.class, emit = CalculateSuperHardSumEvent.class)
+    @Interest(receives = CalculateSuperHardSumResultEvent.class, emits = CalculateSuperHardSumEvent.class)
     public DeferredResult<Integer> doSuperHardcalculation(Integer number1, Integer number32) {
         return null;
     }

@@ -8,7 +8,7 @@ import org.springframework.web.context.request.async.DeferredResult;
  * Created by akivv on 5.5.2017.
  */
 public class TestService {
-    @Interest(emit = CalculateHardSumEvent.class)
+    @Interest(emits = CalculateHardSumEvent.class)
     public DeferredResult<Integer> something() {
         return null;
     }

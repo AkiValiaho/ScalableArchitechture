@@ -11,7 +11,7 @@ import org.springframework.web.context.request.async.DeferredResult;
  */
 @Service
 public class StringToolsService {
-    @Interest(value = AppendStringsEventResult.class, emit = AppendStringsEvent.class)
+    @Interest(receives = AppendStringsEventResult.class, emits = AppendStringsEvent.class)
     public DeferredResult<String> appendStrings(String one, String two) {
         return null;
     }

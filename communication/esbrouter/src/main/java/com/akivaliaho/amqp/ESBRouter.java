@@ -1,6 +1,7 @@
 package com.akivaliaho.amqp;
 
 import com.akivaliaho.ConfigurationPollEventResult;
+import com.akivaliaho.RequestInterestedPartiesEvent;
 import com.akivaliaho.ServiceEvent;
 import com.akivaliaho.ServiceEventResult;
 import com.akivaliaho.config.ConfigEnum;
@@ -97,7 +98,7 @@ public class ESBRouter {
         SimpleMessageListenerContainer container =
                 new SimpleMessageListenerContainer(connectionFactory);
         Object listener = new Object() {
-            public void handleMessage(byte[] bytes) {
+            public void handleMessage(byte[] bytes) throws InstantiationException {
                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
                 try {
                     ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
@@ -108,10 +109,15 @@ public class ESBRouter {
                 }
             }
 
-            public void handleMessage(ServiceEvent foo) {
+            public void handleMessage(ServiceEvent foo) throws InstantiationException {
                 log.info("Got message: {}", foo.getEventName());
                 //Is it a ConfigurationPollResult?
                 if (foo instanceof ConfigurationPollEventResult) {
+                    localEventDelegator.delegateEvent(foo);
+                    return;
+                }
+                //Is it a request for the interested parties?
+                if (foo instanceof RequestInterestedPartiesEvent) {
                     localEventDelegator.delegateEvent(foo);
                     return;
                 }

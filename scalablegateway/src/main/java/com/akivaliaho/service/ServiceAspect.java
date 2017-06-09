@@ -60,13 +60,13 @@ public class ServiceAspect {
             Method invokedMethod = parseMethod(invokedMethodName, proceedingJoinPoint.getSignature().getDeclaringType(), parseArgTypes(proceedingJoinPoint.getArgs()));
             Interest annotation = getAnnotation(invokedMethod);
             DeferredResult<V> deferredresult = new DeferredResult<V>(TimeUnit.MILLISECONDS.convert(300, TimeUnit.SECONDS));
-            asyncQueue.addWaitingResult(deferredresult, proceedingJoinPoint.getArgs(), annotation.emit().getName());
+            asyncQueue.addWaitingResult(deferredresult, proceedingJoinPoint.getArgs(), annotation.emits().getName());
             threadPoolTaskExecutor.execute(() -> {
                 ServiceEvent invoke = null;
                 try {
                     invoke = (ServiceEvent) proceedingJoinPoint.proceed();
                     Interest annotation1 = getAnnotation(invokedMethod);
-                    Class<?> emit = annotation1.emit();
+                    Class<?> emit = annotation1.emits();
                     Constructor<?>[] declaredConstructors = emit.getDeclaredConstructors();
                     Constructor<?> declaredConstructor = declaredConstructors[0];
                     ServiceEvent o = (ServiceEvent) declaredConstructor.newInstance(proceedingJoinPoint.getArgs());
@@ -89,10 +89,10 @@ public class ServiceAspect {
             }
             method method = this.getclass().getmethod(methodname, classes);
             interest annotation = method.getannotation(interest.class);
-            if (annotation == null || annotation.emit() == null) {
-                throw new illegalargumentexception("@interest annotation or given emit-value not present in method: " + method.getname());
+            if (annotation == null || annotation.emits() == null) {
+                throw new illegalargumentexception("@interest annotation or given emits-receives not present in method: " + method.getname());
             }
-            asyncqueue.addwaitingresult(deferredresult, params, annotation.emit().getname());
+            asyncqueue.addwaitingresult(deferredresult, params, annotation.emits().getname());
 
         } catch (nosuchmethodexception e) {
             e.printstacktrace();
@@ -104,8 +104,8 @@ public class ServiceAspect {
 
     private Interest getAnnotation(Method invokedMethod) {
         Interest annotation = invokedMethod.getAnnotation(Interest.class);
-        if (annotation == null || annotation.emit() == null) {
-            throw new IllegalArgumentException("@Interest annotation or given emit-value not present in method: " + invokedMethod.getName());
+        if (annotation == null || annotation.emits() == null) {
+            throw new IllegalArgumentException("@Interest annotation or given emits-receives not present in method: " + invokedMethod.getName());
         }
         return annotation;
     }

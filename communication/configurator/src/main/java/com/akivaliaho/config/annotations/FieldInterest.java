@@ -6,14 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by vagrant on 4/28/17.
+ * Created by akivv on 9.6.2017.
  */
-//Element type for complex meta-annotations
-@Target(ElementType.METHOD)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Interest {
-    Class<?> receives() default Object.class;
-
-    Class<?> emits() default Object.class;
-
+public @interface FieldInterest {
+    Class<?> event() default Object.class;
 }

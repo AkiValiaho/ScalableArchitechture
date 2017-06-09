@@ -1,7 +1,5 @@
 package com.akivaliaho;
 
-import com.akivaliaho.event.EventAndRoutingKeyHolder;
-import com.akivaliaho.event.EventInterestRegistrer;
 import org.apache.camel.builder.RouteBuilder;
 
 import java.io.IOException;
@@ -11,20 +9,21 @@ import java.io.IOException;
  */
 public class FromMQRouteBuilder extends RouteBuilder {
 
+    private final EventNotifierRegisterer eventNotifierRegisterer;
     private ExchangeToServiceEvent exchangeToServiceEvent;
 
-    public FromMQRouteBuilder() {
-        EventAndRoutingKeyHolder eventAndRoutingKeyHolder = new EventAndRoutingKeyHolder();
-        EventInterestRegistrer eventInterestRegistrer = new EventInterestRegistrer(eventAndRoutingKeyHolder);
-        ExchangeTools exchangeTools = new ExchangeTools();
-        ProcessPreparator processPreparator = new ProcessPreparator(eventInterestRegistrer, exchangeTools);
-        this.exchangeToServiceEvent = new ExchangeToServiceEvent(eventInterestRegistrer, exchangeTools, processPreparator);
+    public FromMQRouteBuilder(ExchangeToServiceEvent exchangeToServiceEvent, EventNotifierRegisterer eventNotifierRegisterer) {
+        this.exchangeToServiceEvent = exchangeToServiceEvent;
+        this.eventNotifierRegisterer = eventNotifierRegisterer;
     }
 
     /**
      * Let's configure the Camel routing rules using Java code...
      */
     public void configure() {
+        eventNotifierRegisterer.registerEventNotifierToContext(getContext().getManagementStrategy());
+        //Set the new context
+        exchangeToServiceEvent.setCamelContext(getContext());
         from("rabbitmq://localhost:5672/toBrokerExchange?routingKey=master&queue=toBrokerQueue&username=hello&password=world&exchangeType=topic&autoDelete=false")
                 .log("Got message from service: ${in.header.serviceName}")
                 .process(exchangeToServiceEvent);

@@ -2,9 +2,12 @@ package com.akivaliaho;
 
 import com.akivaliaho.event.EventInterestRegistrer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.model.ModelCamelContext;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -15,13 +18,26 @@ public class ExchangeToServiceEvent implements Processor {
     private final EventInterestRegistrer eventInterestRegistrer;
     private final ExchangeTools exchangeTools;
     private final ProcessPreparator processPreparator;
-    private String configHolderRoutingKey;
+    private CamelContext context;
+    private String configHolderRoutingKey = Addresses.CONFIGURATIONSERVICE_DEFAULT.getValue();
+    private ModelCamelContext camelContext;
 
-    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools, ProcessPreparator processPreparator) {
+    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools, ProcessPreparator processPreparator, CamelContext context) {
         this.eventInterestRegistrer = eventInterestRegistrer;
         this.exchangeTools = exchangeTools;
         this.processPreparator = processPreparator;
         //TODO On-init connection to ConfigurationHolder
+        this.context = context;
+
+    }
+
+    public void sendInterestRequest() {
+        try {
+            exchangeTools.requestInterestedParties(configHolderRoutingKey, context);
+        } catch (IOException e) {
+            //TODO Handle exception
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -41,7 +57,15 @@ public class ExchangeToServiceEvent implements Processor {
             registerInterests(exchange, serviceEvent);
             return true;
         }
+        if (serviceEvent.getEventName().equals("com.akivaliaho.RequestInterestedPartiesEventResult")) {
+            registerOnInitInterestResult(exchange, serviceEvent);
+            return true;
+        }
         return false;
+    }
+
+    private void registerOnInitInterestResult(Exchange exchange, ServiceEvent serviceEvent) {
+        eventInterestRegistrer.registerPollInterestResults(serviceEvent);
     }
 
     private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
@@ -59,5 +83,9 @@ public class ExchangeToServiceEvent implements Processor {
         configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
         //TODO Rethink this a bit, transitive access of a class, not good design
         exchangeTools.sendPollResult(eventInterestRegistrer.getEventInterestMap(), exchange, configHolderRoutingKey);
+    }
+
+    public void setCamelContext(CamelContext camelContext) {
+        this.context = camelContext;
     }
 }

@@ -71,7 +71,7 @@ public class ConfigurationHolder {
         Set<Method> methodsAnnotatedWith = reflections.getMethodsAnnotatedWith(Interest.class);
         methodsAnnotatedWith.stream()
                 .forEach(method -> {
-                    Class<?> value = method.getAnnotation(Interest.class).value();
+                    Class<?> value = method.getAnnotation(Interest.class).receives();
                     if (value.getCanonicalName().equals("java.lang.Object")) {
                         return;
                     }
@@ -79,7 +79,7 @@ public class ConfigurationHolder {
                 });
         List<String> collect1 = methodsAnnotatedWith.stream()
                 //Get Interest annotated stuff
-                .map(interest -> interest.getAnnotation(Interest.class).value().getCanonicalName())
+                .map(interest -> interest.getAnnotation(Interest.class).receives().getCanonicalName())
                 .filter(interest -> !interest.equals("java.lang.Object"))
                 .collect(Collectors.toList());
         return collect1;

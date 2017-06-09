@@ -1,15 +1,14 @@
 package com.akivaliaho.event;
 
+import com.akivaliaho.MethodInvoker;
+import com.akivaliaho.ResultSendingTool;
 import com.akivaliaho.ServiceEvent;
-import com.akivaliaho.ServiceEventResult;
 import com.akivaliaho.amqp.EventUtil;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -19,42 +18,35 @@ import java.util.Map;
 @Component
 @Slf4j
 public class LocalEventDelegator {
-	ApplicationContext applicationContext;
-	private Map<String, Method> interestMap;
+    private final MethodInvoker methodInvoker;
+    private final ResultSendingTool resultSendingTool;
+    ApplicationContext applicationContext;
+    private Map<String, Method> interestMap;
 
 
-	@Setter
-	private EventUtil eventUtil;
+    public void setEventUtil(EventUtil eventUtil) {
+        this.eventUtil = eventUtil;
+        this.resultSendingTool.setEventUtil(eventUtil);
+    }
 
-	@Autowired
-	public LocalEventDelegator(ApplicationContext ctx) {
-		this.applicationContext = ctx;
-	}
+    private EventUtil eventUtil;
 
+    @Autowired
+    public LocalEventDelegator(ApplicationContext ctx, MethodInvoker methodInvoker, ResultSendingTool resultSendingTool) {
+        this.applicationContext = ctx;
+        this.methodInvoker = methodInvoker;
+        this.resultSendingTool = resultSendingTool;
+    }
 
-	public void delegateEvent(ServiceEvent foo) {
-		Method method = interestMap.get(foo.getEventName());
-		//TODO Delegate event to proper event handler
-		Object[] parameters = foo.getParameters();
-		try {
-			Object bean = applicationContext.getBean(method.getDeclaringClass());
-			ServiceEvent invoke = (ServiceEvent) method.invoke(bean, parameters);
-			log.debug("Got event as a result of computation: {}", invoke);
-			if (invoke instanceof ServiceEventResult) {
-				ServiceEventResult invoke1 = (ServiceEventResult) invoke;
-				invoke1.setOriginalParameters(parameters);
-				invoke1.setOriginalEventName(foo.getEventName());
-				eventUtil.publishEventResult(invoke1);
-			} else if (invoke instanceof ServiceEvent) {
-				eventUtil.publishEvent(invoke);
-			}
-		} catch (IllegalAccessException | InvocationTargetException e) {
-			e.printStackTrace();
-		}
-	}
+    public void delegateEvent(ServiceEvent foo) throws InstantiationException {
+        Method method = interestMap.get(foo.getEventName());
+        Object[] parameters = foo.getParameters();
+        MethodInvoker.InvocationResult invocationResult = methodInvoker.invokeMethod(method, parameters);
+        resultSendingTool.send(invocationResult, foo, parameters);
+    }
 
-	public void pluginInterests(Map<String, Method> interestMap) {
-		this.interestMap = interestMap;
-	}
+    public void pluginInterests(Map<String, Method> interestMap) {
+        this.interestMap = interestMap;
+    }
 
 }

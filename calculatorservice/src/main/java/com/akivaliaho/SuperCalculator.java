@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SuperCalculator {
-    @Interest(value = CalculateSuperHardSumEvent.class)
+    @Interest(receives = CalculateSuperHardSumEvent.class)
     public CalculateSuperHardSumResultEvent calculateSuperHard(Integer one, Integer two) {
         int i = one + two;
         return new CalculateSuperHardSumResultEvent(i);

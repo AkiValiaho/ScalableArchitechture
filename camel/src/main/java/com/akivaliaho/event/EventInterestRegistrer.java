@@ -25,7 +25,8 @@ public class EventInterestRegistrer {
     }
 
     public List<String> getInterestedParties(ServiceEvent serviceEvent) {
-        if (!serviceEvent.getEventName().equals("declarationOfInterests")) {
+        //TODO Refactor this brittle piece of logic somewhere more general (eg. InterestFlowControl-module)
+        if (!serviceEvent.getEventName().equals("declarationOfInterests") && !serviceEvent.getEventName().equals("com.akivaliaho.RequestInterestedPartiesEventResult")) {
             log.info("Trying to get interested parties with service event: {}", serviceEvent.getEventName());
             List<String> strings = eventAndRoutingKeyHolder.get(serviceEvent);
             if (strings == null || strings.isEmpty()) {
@@ -41,8 +42,22 @@ public class EventInterestRegistrer {
         return null;
     }
 
+    public void registerPollInterestResults(ServiceEvent serviceEvent) {
+        HashMap<ServiceEvent, List<String>> serviceEventListHashMap = (HashMap<ServiceEvent, List<String>>) serviceEvent.getParameters()[0];
+        //If the list is null configuration module has not yet received the interests from camel (eg. first start)
+        //Lets not override anything
+        if (serviceEventListHashMap != null) {
+            HashMap<ServiceEvent, List<String>> eventInterestMap = eventAndRoutingKeyHolder.getEventInterestMap();
+            eventInterestMap.putAll(serviceEventListHashMap);
+        }
+    }
+
     public void registerInterests(ServiceEvent serviceEvent) {
         checkRegisterInterestsPreconditions(serviceEvent);
+        registerAfterCheckPassed(serviceEvent);
+    }
+
+    private void registerAfterCheckPassed(ServiceEvent serviceEvent) {
         List<ServiceEvent> serviceEventList = (List<ServiceEvent>) serviceEvent.getParameters()[0];
         //Number 1 is the routing key parameter
         String serviceRoutingKey = (String) serviceEvent.getEventParams().getParams()[1];
