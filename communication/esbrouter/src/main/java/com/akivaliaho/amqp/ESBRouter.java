@@ -51,6 +51,7 @@ public class ESBRouter {
 
     @PostConstruct
     public void init() {
+        //TODO This initializer is too damn long and hard to read (not going to even try), do something about it.
         Map<String, String> messagingConfiguration = configurationHolder.getMessagingConfiguration();
         //Init connection to the master broker
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory(messagingConfiguration.get("mq.address"), Integer.parseInt(messagingConfiguration.get("mq.port")));
@@ -87,6 +88,7 @@ public class ESBRouter {
     }
 
     private void bindingsInit(Map<String, String> messagingConfiguration, RabbitAdmin admin, Queue serviceQueue, Queue toESBQueue) {
+        //TODO Bindings should be part of another AMQP-related configuration class
         declare(admin, serviceQueue, toESBQueue, mq_from_esb_exchange, mq_to_esb_exchange);
         routingKey = messagingConfiguration.get(ConfigEnum
                 .SERVICEBASENAME);
@@ -141,6 +143,7 @@ public class ESBRouter {
     }
 
     private void declareBindings(RabbitAdmin admin, Queue service_queue, FanoutExchange mq_from_esb_exchange) {
+        //TODO Declarations should be part of another composed class, this is a router after all
         admin.declareBinding(
                 BindingBuilder.bind(service_queue).to(mq_from_esb_exchange));
     }

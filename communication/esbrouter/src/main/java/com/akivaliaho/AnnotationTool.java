@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Component
 public class AnnotationTool {
     //TODO Write tests for this class
-    public Interest getAnnotation(Method invokedMethod) {
+    public Interest getInterestAnnotation(Method invokedMethod) {
         Interest annotation = invokedMethod.getAnnotation(Interest.class);
         if (annotation == null || annotation.emits() == null) {
             throw new IllegalArgumentException("@Interest annotation or given emits-receives not present in method: " + invokedMethod.getName());

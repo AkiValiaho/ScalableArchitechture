@@ -43,6 +43,7 @@ public class EventInterestRegistrer {
     }
 
     public void registerPollInterestResults(ServiceEvent serviceEvent) {
+        //TODO Fairly simple, but the whole Interest-contraception needs some additional thought
         HashMap<ServiceEvent, List<String>> serviceEventListHashMap = (HashMap<ServiceEvent, List<String>>) serviceEvent.getParameters()[0];
         //If the list is null configuration module has not yet received the interests from camel (eg. first start)
         //Lets not override anything
@@ -82,6 +83,7 @@ public class EventInterestRegistrer {
         TypeToken serviceCheck = new TypeToken<List<ServiceEvent>>() {
         };
         Object[] parameters = serviceEvent.getParameters();
+        //TODO Way too damn brittle stuff here, better refactor this out
         //Check that there actually are two parameters, the parameter list and the service routing key for communication purposes
         if (parameters != null && parameters.length > 1) {
             checkArgument(parameters[0].getClass().isAssignableFrom(ArrayList.class));

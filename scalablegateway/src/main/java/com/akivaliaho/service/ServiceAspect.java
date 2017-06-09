@@ -52,6 +52,7 @@ public class ServiceAspect {
 
     @Around("servicePointcut()")
     public <V> DeferredResult<V> aroundServiceCall(ProceedingJoinPoint proceedingJoinPoint) {
+        //TODO Too long, needs splitting up
         MethodInvocationProceedingJoinPoint methodInvcJoinPoint = (MethodInvocationProceedingJoinPoint) proceedingJoinPoint;
         String invokedMethodName = methodInvcJoinPoint.getSignature().getName();
         //Parse arg types
@@ -81,23 +82,6 @@ public class ServiceAspect {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-/*        try {
-            deferredresult<v> deferredresult = new deferredresult<>(timeunit.milliseconds.convert(30, timeunit.seconds));
-            class<?>[] classes = null;
-            if (params != null) {
-                classes = parseparamclasses(params);
-            }
-            method method = this.getclass().getmethod(methodname, classes);
-            interest annotation = method.getannotation(interest.class);
-            if (annotation == null || annotation.emits() == null) {
-                throw new illegalargumentexception("@interest annotation or given emits-receives not present in method: " + method.getname());
-            }
-            asyncqueue.addwaitingresult(deferredresult, params, annotation.emits().getname());
-
-        } catch (nosuchmethodexception e) {
-            e.printstacktrace();
-        }
-        return null;*/
         System.out.println(proceedingJoinPoint);
         return null;
     }

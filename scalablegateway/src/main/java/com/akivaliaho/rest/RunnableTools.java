@@ -32,6 +32,7 @@ public class RunnableTools {
     }
 
     public void startRunnables(List<String> runnables, Runtime runtime) {
+        //TODO Ugh, ugly, better refactor this
         runnables.parallelStream().map(this::addCommand)
                 .forEach(cmd -> {
                     try {

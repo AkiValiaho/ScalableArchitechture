@@ -24,7 +24,7 @@ public class InstanceCreator {
     }
 
     public Optional<ServiceEvent> createMethodReturnTypeIfPresent(Method method, Object bean) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        Interest annotation = annotationTool.getAnnotation(method);
+        Interest annotation = annotationTool.getInterestAnnotation(method);
         if (annotation.emits() != Object.class) {
             Constructor<?> declaredConstructor = annotationTool.findServiceEventConstructor(annotation);
             Field fieldInterest = annotationTool.findFieldInterest(annotation.emits(), method.getDeclaringClass());

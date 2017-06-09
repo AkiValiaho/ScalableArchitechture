@@ -33,6 +33,7 @@ public class ExchangeTools {
     }
 
     private byte[] getBytes(ServiceEvent serviceEvent, ServiceEventResult finalServiceEventResult) throws IOException {
+        //TODO Refactor this to a separate ByteTools utility!
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
         if (finalServiceEventResult != null) {
@@ -67,6 +68,7 @@ public class ExchangeTools {
     }
 
     public void sendToInterestedParties(PreProcessData preProcessData, Exchange exchange) {
+        //TODO These senders should be part of another class
         validatePreProcessData(preProcessData);
         List<String> interestedParties = preProcessData.getInterestedParties();
         ServiceEvent serviceEvent = preProcessData.getServiceEvent();
