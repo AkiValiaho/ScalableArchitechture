@@ -1,5 +1,5 @@
 # ScalableArchitechture
-Opinionated Event-Driven architechture using RabbitMQ and Mule ESB
+Opinionated Event-Driven Fog computing architechture using RabbitMQ and Mule ESB
 
 
 
