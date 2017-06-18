@@ -20,7 +20,6 @@ public class AmqpConfiguratorTest {
 
     @Before
     public void init() {
-
         amqpEntitiesConstructor = mock(AmqpEntitiesConstructor.class);
         asyncQueue = mock(AsyncQueue.class);
         localEventDelegator = mock(LocalEventDelegator.class);
@@ -35,6 +34,7 @@ public class AmqpConfiguratorTest {
         when(amqpEntitiesConstructor.getTemplate()).thenReturn(rabbitTemplate);
         amqpConfigurator.configureAmqp(mock);
         verify(amqpEntitiesConstructor, times(1)).constructAmqpEntities();
+        verify(localEventDelegator, times(1)).setEventUtil(any());
         assertEquals(amqpEntitiesConstructor.getTemplate(), rabbitTemplate);
     }
 
