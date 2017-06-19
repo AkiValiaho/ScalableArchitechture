@@ -1,12 +1,9 @@
 package com.akivaliaho.amqp;
 
-import com.akivaliaho.ConfigurationPollEventResult;
-import com.akivaliaho.RequestInterestedPartiesEvent;
 import com.akivaliaho.ServiceEvent;
-import com.akivaliaho.ServiceEventResult;
+import com.akivaliaho.amqp.eventstrategy.AmqpEventStrategyHandler;
 import com.akivaliaho.config.ConfigEnum;
 import com.akivaliaho.event.AsyncQueue;
-import com.akivaliaho.event.LocalEventDelegator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Queue;
@@ -28,14 +25,14 @@ import java.util.Map;
 @Component
 @Slf4j
 public class AmqpContainerInitialiser {
-    private final LocalEventDelegator localEventDelegator;
     private final AsyncQueue asyncQueue;
+    private final AmqpEventStrategyHandler amqpEventStrategyHandler;
     @Getter
     private String serviceNameRoutingKey;
 
     @Autowired
-    public AmqpContainerInitialiser(LocalEventDelegator localEventDelegator, AsyncQueue asyncQueue) {
-        this.localEventDelegator = localEventDelegator;
+    public AmqpContainerInitialiser(AmqpEventStrategyHandler amqpEventStrategyHandler, AsyncQueue asyncQueue) {
+        this.amqpEventStrategyHandler = amqpEventStrategyHandler;
         this.asyncQueue = asyncQueue;
     }
 
@@ -62,23 +59,7 @@ public class AmqpContainerInitialiser {
 
             public void handleMessage(ServiceEvent foo) throws InstantiationException {
                 log.info("Got message: {}", foo.getEventName());
-                //Is it a ConfigurationPollResult?
-                //TODO Convert this to strategy pattern, it's increasing all the time
-                if (foo instanceof ConfigurationPollEventResult) {
-                    localEventDelegator.delegateEvent(foo);
-                    return;
-                }
-                //Is it a request for the interested parties?
-                if (foo instanceof RequestInterestedPartiesEvent) {
-                    localEventDelegator.delegateEvent(foo);
-                    return;
-                }
-                //Is it a Result event?
-                if (foo.getEventName().toLowerCase().contains("result")) {
-                    asyncQueue.solveResult(((ServiceEventResult) foo));
-                } else {
-                    localEventDelegator.delegateEvent(foo);
-                }
+                amqpEventStrategyHandler.executeCommand(foo);
             }
 
             public void handleMessage(Object object) {
