@@ -72,7 +72,6 @@ public class ExchangeToServiceEvent implements Processor {
     private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
         ServiceEvent o = (ServiceEvent) ((ArrayList) serviceEvent.getParameters()[0]).get(0);
         eventInterestRegistrer.registerInterests(serviceEvent);
-        //TODO Brittle logic here, better refactor this whole Interest-business with Strategy pattern to avoid unnecessary complexity
         if (o.getEventName().equals("com.akivaliaho.ConfigurationPollEventResult")) {
             sendPollResultToConfigModule(exchange, serviceEvent);
         } else if (configHolderRoutingKey != null && !configHolderRoutingKey.isEmpty()) {

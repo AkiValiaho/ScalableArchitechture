@@ -20,6 +20,7 @@ public class AsyncQueue {
     Map<Params, Map<String, List<DeferredResult<?>>>> hitList = new HashMap<>();
 
     public void addWaitingResult(DeferredResult<?> vAsyncResult, Object[] params, String eventName) {
+        //TODO Way too much stuff here
         Params params1 = new Params(params);
         if (hitList.containsKey(params1)) {
             Map<String, List<DeferredResult<?>>> stringListMap = hitList.get(params1);
@@ -37,6 +38,12 @@ public class AsyncQueue {
             listOfDeferredResults.add(vAsyncResult);
             stringListHashMap.put(eventName, listOfDeferredResults);
             hitList.put(params1, stringListHashMap);
+        }
+    }
+
+    public void solveResult(Object foo) {
+        if (foo instanceof ServiceEventResult) {
+            solveResult(((ServiceEventResult) foo));
         }
     }
 

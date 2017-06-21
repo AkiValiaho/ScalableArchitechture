@@ -16,7 +16,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Created by akivv on 18.5.2017.
  */
 public class ExchangeTools {
+
+    private final ByteTools byteTools;
+
+    public ExchangeTools() {
+        this.byteTools = new ByteTools();
+    }
+
     ObjectInputStream feedOutputStream(Exchange exchange) throws IOException {
+        //TODO Refactor this whole class, it's spaghetti
         byte[] body = (byte[]) exchange.getIn().getBody();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body);
         return new ObjectInputStream(byteArrayInputStream);
@@ -33,16 +41,11 @@ public class ExchangeTools {
     }
 
     private byte[] getBytes(ServiceEvent serviceEvent, ServiceEventResult finalServiceEventResult) throws IOException {
-        //TODO Refactor this to a separate ByteTools utility!
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        if (finalServiceEventResult != null) {
-            objectOutputStream.writeObject(finalServiceEventResult);
-        } else {
-            objectOutputStream.writeObject(serviceEvent);
-        }
-        objectOutputStream.flush();
-        return byteArrayOutputStream.toByteArray();
+            if (finalServiceEventResult != null) {
+                return byteTools.objectToBytes(finalServiceEventResult);
+            } else {
+                return byteTools.objectToBytes(serviceEvent);
+            }
     }
 
     private void sendExchangeWithProducerTemplate(Exchange exchange, String event, byte[] bytes) {
