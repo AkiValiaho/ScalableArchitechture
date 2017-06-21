@@ -58,8 +58,9 @@ public class AmqpContainerInitialiser {
             }
 
             public void handleMessage(ServiceEvent foo) throws InstantiationException {
-                log.info("Got message: {}", foo.getEventName());
-                amqpEventStrategyHandler.executeCommand(foo);
+                if (foo != null) {
+                    amqpEventStrategyHandler.executeIncomingAmqpCommand(foo);
+                }
             }
 
             public void handleMessage(Object object) {
