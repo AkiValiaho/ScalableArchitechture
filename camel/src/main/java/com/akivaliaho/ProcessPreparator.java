@@ -11,16 +11,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ProcessPreparator {
     private final EventInterestRegistrer eventInterestRegistrer;
-    private final ExchangeTools exchangeTools;
+    private final DefaultExchangeTools defaultExchangeTools;
     private Exchange exchange;
     private ServiceEvent serviceEvent;
     private ServiceEventResult serviceEventResult;
     private List<String> interestedParties;
     private Object preprocessData;
 
-    public ProcessPreparator(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools) {
+    public ProcessPreparator(EventInterestRegistrer eventInterestRegistrer, DefaultExchangeTools defaultExchangeTools) {
         this.eventInterestRegistrer = eventInterestRegistrer;
-        this.exchangeTools = exchangeTools;
+        this.defaultExchangeTools = defaultExchangeTools;
     }
 
     public ServiceEvent getServiceEvent() {
@@ -43,7 +43,7 @@ public class ProcessPreparator {
     }
 
     private ServiceEvent convertExchangeToServiceEvent(Exchange exchange) throws IOException, ClassNotFoundException {
-        ObjectInputStream objectInputStream = exchangeTools.feedOutputStream(exchange);
+        ObjectInputStream objectInputStream = defaultExchangeTools.feedOutputStream(exchange);
         return (ServiceEvent) objectInputStream.readObject();
 
     }

@@ -23,13 +23,13 @@ import static org.mockito.Mockito.when;
 public class ProcessPreparatorTest {
     private ProcessPreparator processPreparator;
     private EventInterestRegistrer eventInterestRegistrerMock;
-    private ExchangeTools exchangeToolsMock;
+    private DefaultExchangeTools defaultExchangeToolsMock;
 
     @Before
     public void initTest() {
         eventInterestRegistrerMock = mock(EventInterestRegistrer.class);
-        exchangeToolsMock = mock(ExchangeTools.class);
-        this.processPreparator = new ProcessPreparator(eventInterestRegistrerMock, exchangeToolsMock);
+        defaultExchangeToolsMock = mock(DefaultExchangeTools.class);
+        this.processPreparator = new ProcessPreparator(eventInterestRegistrerMock, defaultExchangeToolsMock);
     }
 
     @org.junit.Test
@@ -56,7 +56,7 @@ public class ProcessPreparatorTest {
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        when(exchangeToolsMock.feedOutputStream(any())).thenReturn(objectInputStream);
+        when(defaultExchangeToolsMock.feedOutputStream(any())).thenReturn(objectInputStream);
         List<String> interestList = new ArrayList<>();
         interestList.add(randomEvent.getEventName());
         when(eventInterestRegistrerMock.getInterestedParties(any())).thenReturn(interestList);
