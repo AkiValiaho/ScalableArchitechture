@@ -9,6 +9,7 @@ import org.apache.camel.model.ModelCamelContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by akivv on 24.4.2017.
@@ -17,17 +18,18 @@ import java.util.ArrayList;
 public class ExchangeToServiceEvent implements Processor {
     private final EventInterestRegistrer eventInterestRegistrer;
     private final ExchangeTools exchangeTools;
-    private final ProcessPreparator processPreparator;
+    private final ExchangeParser exchangeParser;
     private CamelContext context;
     private String configHolderRoutingKey = Addresses.CONFIGURATIONSERVICE_DEFAULT.getValue();
     private ModelCamelContext camelContext;
 
-    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools, ProcessPreparator processPreparator, CamelContext context) {
+    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools, CamelContext context,
+                                  ExchangeParser exchangeParser) {
         this.eventInterestRegistrer = eventInterestRegistrer;
         this.exchangeTools = exchangeTools;
-        this.processPreparator = processPreparator;
         //TODO On-init connection to ConfigurationHolder
         this.context = context;
+        this.exchangeParser = exchangeParser;
 
     }
 
@@ -42,14 +44,12 @@ public class ExchangeToServiceEvent implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        PreProcessData preprocessData = processPreparator
-                //TODO These steps are not necessary I think, simplify them to a single call
-                .feedExchange(exchange)
-                .invoke()
-                .getPreprocessData();
-        if (!handleDeclarationOfInterest(exchange, preprocessData.getServiceEvent())) {
-            exchangeTools.sendToInterestedParties(preprocessData, exchange
-            );
+        //Convert exchange to serviceevent
+        ServiceEvent serviceEvent = exchangeParser.parseServiceEvent(exchange);
+        ServiceEventResult serviceEventResult = exchangeParser.parseServiceEventResult(serviceEvent);
+        List<String> interestedParties = eventInterestRegistrer.getInterestedParties(serviceEvent);
+        if (!handleDeclarationOfInterest(exchange, serviceEvent)) {
+            exchangeTools.sendToInterestedParties(interestedParties, serviceEvent, serviceEventResult, exchange);
         }
     }
 

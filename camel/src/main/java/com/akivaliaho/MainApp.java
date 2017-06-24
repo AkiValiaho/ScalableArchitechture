@@ -14,13 +14,13 @@ public class MainApp {
      */
     public static void main(String... args) throws Exception {
         Main main = new Main();
-        DefaultExchangeTools defaultExchangeTools = new DefaultExchangeTools(new ExchangePropertyStrategyFactory().createStrategy(ExchangePropertyStrategyFactory.ExchangePropertyStrategy.DEFAULT_EXCHANGE_PROPERTIES), new ByteTools());
+        ExchangeTools defaultExchangeTools = new ExchangeTools(new ExchangePropertyStrategyFactory().createStrategy(ExchangePropertyStrategyFactory.ExchangePropertyStrategy.DEFAULT_EXCHANGE_PROPERTIES), new ByteTools());
 
 
         EventAndRoutingKeyHolder eventAndRoutingKeyHolder = new EventAndRoutingKeyHolder();
 
 
-        ExchangeToServiceEvent exchangeToServiceEvent = new ExchangeToServiceEvent(new EventInterestRegistrer(eventAndRoutingKeyHolder), defaultExchangeTools, new ProcessPreparator(new EventInterestRegistrer(eventAndRoutingKeyHolder), defaultExchangeTools), main.getOrCreateCamelContext());
+        ExchangeToServiceEvent exchangeToServiceEvent = new ExchangeToServiceEvent(new EventInterestRegistrer(eventAndRoutingKeyHolder), defaultExchangeTools, main.getOrCreateCamelContext(), new ExchangeParserImpl(defaultExchangeTools));
 
 
         FromMQRouteBuilder routeBuilder = new FromMQRouteBuilder(exchangeToServiceEvent, new EventNotifierRegisterer(new RoutesReadyEventNotifier(exchangeToServiceEvent)));

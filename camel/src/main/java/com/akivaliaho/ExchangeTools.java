@@ -10,19 +10,17 @@ import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Created by akivv on 18.5.2017.
  */
 public class ExchangeTools {
 
     private final ByteTools byteTools;
-    private final ExchangePropertyStrategyFactory exchangePropertyStrategyFactory;
+    private final ExchangePropertyPopulator exchangePropertyPopulator;
 
-    public ExchangeTools() {
-        this.byteTools = new ByteTools();
-        this.exchangePropertyStrategyFactory = new ExchangePropertyStrategyFactory();
+    public ExchangeTools(ExchangePropertyPopulator exchangePropertyPopulator, ByteTools byteTools) {
+        this.byteTools = byteTools;
+        this.exchangePropertyPopulator = exchangePropertyPopulator;
     }
 
     ObjectInputStream feedOutputStream(Exchange exchange) throws IOException {
@@ -43,17 +41,16 @@ public class ExchangeTools {
     }
 
     private byte[] getBytes(ServiceEvent serviceEvent, ServiceEventResult finalServiceEventResult) throws IOException {
-            if (finalServiceEventResult != null) {
-                return byteTools.objectToBytes(finalServiceEventResult);
-            } else {
-                return byteTools.objectToBytes(serviceEvent);
-            }
+        if (finalServiceEventResult != null) {
+            return byteTools.objectToBytes(finalServiceEventResult);
+        } else {
+            return byteTools.objectToBytes(serviceEvent);
+        }
     }
 
     private void sendExchangeWithProducerTemplate(Exchange exchange, String event, byte[] bytes) {
         //Set Default routing properties for the exchange message
-        exchangePropertyStrategyFactory.createStrategy(ExchangePropertyStrategyFactory.ExchangePropertyStrategy.DEFAULT_EXCHANGE_PROPERTIES)
-                                        .configureExchange(exchange, event, bytes);
+        exchangePropertyPopulator.configureExchange(exchange, event, bytes);
         exchange.getContext().createProducerTemplate().send("direct:fromESB", exchange);
     }
 
@@ -64,12 +61,8 @@ public class ExchangeTools {
 
     }
 
-    public void sendToInterestedParties(PreProcessData preProcessData, Exchange exchange) {
+    public void sendToInterestedParties(List<String> interestedParties, ServiceEvent serviceEvent, ServiceEventResult serviceEventResult, Exchange exchange) {
         //TODO These senders should be part of another class
-        validatePreProcessData(preProcessData);
-        List<String> interestedParties = preProcessData.getInterestedParties();
-        ServiceEvent serviceEvent = preProcessData.getServiceEvent();
-        ServiceEventResult serviceEventResult = preProcessData.getServiceEventResult();
         sendToParties(exchange, interestedParties, serviceEvent, serviceEventResult);
     }
 
@@ -80,14 +73,6 @@ public class ExchangeTools {
                     .forEach(event -> {
                         sendExchangeThroughTemplate(exchange, serviceEvent, finalServiceEventResult, event);
                     });
-        }
-    }
-
-    private void validatePreProcessData(PreProcessData preProcessData) {
-        checkNotNull(preProcessData.getInterestedParties());
-        if (preProcessData.getServiceEvent() == null) {
-            //then serviceEventResult should not be null
-            checkNotNull(preProcessData.getServiceEventResult());
         }
     }
 
