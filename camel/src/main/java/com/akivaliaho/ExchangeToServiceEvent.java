@@ -16,24 +16,25 @@ import java.util.ArrayList;
 @Slf4j
 public class ExchangeToServiceEvent implements Processor {
     private final EventInterestRegistrer eventInterestRegistrer;
-    private final ExchangeTools exchangeTools;
     private final ProcessPreparator processPreparator;
+    private final ExchangeDestinationAwareFactory exchangeDestionationAwareFactory;
     private CamelContext context;
     private String configHolderRoutingKey = Addresses.CONFIGURATIONSERVICE_DEFAULT.getValue();
     private ModelCamelContext camelContext;
 
-    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools, ProcessPreparator processPreparator, CamelContext context) {
+    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer ,ExchangeDestinationAwareFactory exchangeDestinationAwareFactory,ProcessPreparator processPreparator, CamelContext context) {
         this.eventInterestRegistrer = eventInterestRegistrer;
-        this.exchangeTools = exchangeTools;
         this.processPreparator = processPreparator;
-        //TODO On-init connection to ConfigurationHolder
         this.context = context;
+        this.exchangeDestionationAwareFactory = exchangeDestinationAwareFactory;
 
     }
 
     public void sendInterestRequest() {
         try {
-            exchangeTools.requestInterestedParties(configHolderRoutingKey, context);
+            exchangeDestionationAwareFactory.createExchangeSendingOperation(ExchangeOperation.REQUEST_INTERESTED_PARTIES_FROM_CONFIG)
+                                            .sendExchange(null, configHolderRoutingKey, context);
+            defaultExchangeTools.requestInterestedParties(configHolderRoutingKey, context);
         } catch (IOException e) {
             //TODO Handle exception
             e.printStackTrace();
@@ -48,8 +49,11 @@ public class ExchangeToServiceEvent implements Processor {
                 .invoke()
                 .getPreprocessData();
         if (!handleDeclarationOfInterest(exchange, preprocessData.getServiceEvent())) {
-            exchangeTools.sendToInterestedParties(preprocessData, exchange
-            );
+            exchangeDestionationAwareFactory.createExchangeSendingOperation(ExchangeOperation.INTERESTED_PARTIES)
+                                            .sendExchange(exchange,
+                                                    preprocessData.getInterestedParties(),
+                                                    preprocessData.getServiceEvent(),
+                                                    preprocessData.getServiceEventResult());
         }
     }
 
@@ -72,6 +76,8 @@ public class ExchangeToServiceEvent implements Processor {
     private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
         ServiceEvent o = (ServiceEvent) ((ArrayList) serviceEvent.getParameters()[0]).get(0);
         eventInterestRegistrer.registerInterests(serviceEvent);
+<<<<<<< Updated upstream
+        //TODO Brittle logic here, better refactor this whole Interest-business with Strategy pattern to avoid unnecessary complexity
         if (o.getEventName().equals("com.akivaliaho.ConfigurationPollEventResult")) {
             sendPollResultToConfigModule(exchange, serviceEvent);
         } else if (configHolderRoutingKey != null && !configHolderRoutingKey.isEmpty()) {
@@ -84,6 +90,10 @@ public class ExchangeToServiceEvent implements Processor {
         configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
         //TODO Rethink this a bit, transitive access of a class, not good design
         exchangeTools.sendPollResult(eventInterestRegistrer.getEventInterestMap(), exchange, configHolderRoutingKey);
+=======
+        exchangeDestionationAwareFactory.createExchangeSendingOperation(ExchangeOperation.POLL_RESULT_TO_CONFIG_MODULE)
+                                        .sendExchange(exchange, );
+>>>>>>> Stashed changes
     }
 
     public void setCamelContext(CamelContext camelContext) {
