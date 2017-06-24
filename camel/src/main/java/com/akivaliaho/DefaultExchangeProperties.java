@@ -13,13 +13,13 @@ public class DefaultExchangeProperties implements ExchangePropertyPopulator {
         setDefaultExchangeProperties(((Exchange) params[0]), ((String) params[1]), ((byte[]) params[2]));
     }
 
-    private void setDefaultExchangeProperties(Exchange exchange, String routingKey, byte[] bytes) {
+    private void setDefaultExchangeProperties(Exchange exchange, String event, byte[] bytes) {
         //If in is empty this is a default message, fill the in
         if (exchange.getIn() == null) {
             exchange.setIn(new DefaultMessage());
         }
         exchange.getIn().setBody(bytes);
-        exchange.getIn().setHeader("routingKey", routingKey);
+        exchange.getIn().setHeader("routingKey", event);
         exchange.getIn().setHeader(RabbitMQConstants.EXCHANGE_NAME, exchange.getIn().getHeader("routingKey"));
         exchange.getIn().setHeader(RabbitMQConstants.ROUTING_KEY, "");
     }

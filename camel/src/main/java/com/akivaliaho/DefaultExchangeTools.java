@@ -2,11 +2,11 @@ package com.akivaliaho;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.component.rabbitmq.RabbitMQConstants;
 import org.apache.camel.impl.DefaultExchange;
-import org.apache.camel.impl.DefaultMessage;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,9 +18,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ExchangeTools {
 
     private final ByteTools byteTools;
+    private final ExchangePropertyStrategyFactory exchangePropertyStrategyFactory;
 
     public ExchangeTools() {
         this.byteTools = new ByteTools();
+        this.exchangePropertyStrategyFactory = new ExchangePropertyStrategyFactory();
     }
 
     ObjectInputStream feedOutputStream(Exchange exchange) throws IOException {
@@ -49,20 +51,12 @@ public class ExchangeTools {
     }
 
     private void sendExchangeWithProducerTemplate(Exchange exchange, String event, byte[] bytes) {
-        setRoutingKeyProperties(exchange, event, bytes);
+        //Set Default routing properties for the exchange message
+        exchangePropertyStrategyFactory.createStrategy(ExchangePropertyStrategyFactory.ExchangePropertyStrategy.DEFAULT_EXCHANGE_PROPERTIES)
+                                        .configureExchange(exchange, event, bytes);
         exchange.getContext().createProducerTemplate().send("direct:fromESB", exchange);
     }
 
-    private void setRoutingKeyProperties(Exchange exchange, String event, byte[] bytes) {
-        //If in is empty this is a default message, fill the in
-        if (exchange.getIn() == null) {
-            exchange.setIn(new DefaultMessage());
-        }
-        exchange.getIn().setBody(bytes);
-        exchange.getIn().setHeader("routingKey", event);
-        exchange.getIn().setHeader(RabbitMQConstants.EXCHANGE_NAME, exchange.getIn().getHeader("routingKey"));
-        exchange.getIn().setHeader(RabbitMQConstants.ROUTING_KEY, "");
-    }
 
     public void sendPollResult(HashMap<ServiceEvent, List<String>> eventInterestMap, Exchange exchange, String event) {
         ServiceEventResult serviceEvent = new ConfigurationPollEventResult(eventInterestMap);
