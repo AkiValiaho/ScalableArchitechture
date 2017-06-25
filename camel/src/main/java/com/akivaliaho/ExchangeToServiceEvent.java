@@ -7,86 +7,35 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.model.ModelCamelContext;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by akivv on 24.4.2017.
  */
 @Slf4j
 public class ExchangeToServiceEvent implements Processor {
     private final EventInterestRegistrer eventInterestRegistrer;
-    private final ExchangeTools exchangeTools;
-    private final ExchangeParser exchangeParser;
+    private final ServiceEventHandler serviceEventHandler;
     private CamelContext context;
     private String configHolderRoutingKey = Addresses.CONFIGURATIONSERVICE_DEFAULT.getValue();
     private ModelCamelContext camelContext;
 
-    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ExchangeTools exchangeTools, CamelContext context,
-                                  ExchangeParser exchangeParser) {
+    public ExchangeToServiceEvent(EventInterestRegistrer eventInterestRegistrer, ServiceEventHandler serviceEventHandler,  CamelContext context
+                                  ) {
         this.eventInterestRegistrer = eventInterestRegistrer;
-        this.exchangeTools = exchangeTools;
-        //TODO On-init connection to ConfigurationHolder
         this.context = context;
-        this.exchangeParser = exchangeParser;
-
-    }
-
-    public void sendInterestRequest() {
-        try {
-            exchangeTools.requestInterestedParties(configHolderRoutingKey, context);
-        } catch (IOException e) {
-            //TODO Handle exception
-            e.printStackTrace();
-        }
+        this.serviceEventHandler = serviceEventHandler;
     }
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        //Convert exchange to serviceevent
-        ServiceEvent serviceEvent = exchangeParser.parseServiceEvent(exchange);
-        ServiceEventResult serviceEventResult = exchangeParser.parseServiceEventResult(serviceEvent);
-        List<String> interestedParties = eventInterestRegistrer.getInterestedParties(serviceEvent);
-        if (!handleDeclarationOfInterest(exchange, serviceEvent)) {
-            exchangeTools.sendToInterestedParties(interestedParties, serviceEvent, serviceEventResult, exchange);
-        }
-    }
+        serviceEventHandler.handleServiceEvent(exchange);
 
-    private boolean handleDeclarationOfInterest(Exchange exchange, ServiceEvent serviceEvent) {
-        if (serviceEvent.getEventName().equals("declarationOfInterests")) {
-            registerInterests(exchange, serviceEvent);
-            return true;
-        }
-        if (serviceEvent.getEventName().equals("com.akivaliaho.RequestInterestedPartiesEventResult")) {
-            registerOnInitInterestResult(exchange, serviceEvent);
-            return true;
-        }
-        return false;
-    }
-
-    private void registerOnInitInterestResult(Exchange exchange, ServiceEvent serviceEvent) {
-        eventInterestRegistrer.registerPollInterestResults(serviceEvent);
-    }
-
-    private void registerInterests(Exchange exchange, ServiceEvent serviceEvent) {
-        ServiceEvent o = (ServiceEvent) ((ArrayList) serviceEvent.getParameters()[0]).get(0);
-        eventInterestRegistrer.registerInterests(serviceEvent);
-        if (o.getEventName().equals("com.akivaliaho.ConfigurationPollEventResult")) {
-            sendPollResultToConfigModule(exchange, serviceEvent);
-        } else if (configHolderRoutingKey != null && !configHolderRoutingKey.isEmpty()) {
-            exchangeTools.sendPollResult(eventInterestRegistrer.getEventInterestMap(), exchange, configHolderRoutingKey);
-        }
-    }
-
-    private void sendPollResultToConfigModule(Exchange exchange, ServiceEvent serviceEvent) {
-        //Send an configHolderRoutingKey about every interest back to the configuration holder
-        configHolderRoutingKey = (String) serviceEvent.getParameters()[1];
-        //TODO Rethink this a bit, transitive access of a class, not good design
-        exchangeTools.sendPollResult(eventInterestRegistrer.getEventInterestMap(), exchange, configHolderRoutingKey);
     }
 
     public void setCamelContext(CamelContext camelContext) {
-        this.context = camelContext;
+        this.serviceEventHandler.setCamelContext(camelContext);
+    }
+
+    public void sendInterestRequest() {
+        this.serviceEventHandler.sendInterestRequest();
     }
 }
