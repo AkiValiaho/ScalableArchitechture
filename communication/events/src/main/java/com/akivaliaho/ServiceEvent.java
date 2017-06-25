@@ -55,36 +55,36 @@ public class ServiceEvent implements Serializable {
         return this.originalEventName;
     }
 
-    public Object[] getOriginalParameters() {
-        return this.originalParameters;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getEventName() {
-        return this.eventName;
-    }
-
-    public Object[] getParameters() {
-        return this.parameters;
-    }
-
     public void setOriginalEventName(String originalEventName) {
         this.originalEventName = originalEventName;
+    }
+
+    public Object[] getOriginalParameters() {
+        return this.originalParameters;
     }
 
     public void setOriginalParameters(Object[] originalParameters) {
         this.originalParameters = originalParameters;
     }
 
+    public Long getId() {
+        return this.id;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
 
+    public String getEventName() {
+        return this.eventName;
+    }
+
     public void setEventName(String eventName) {
         this.eventName = eventName;
+    }
+
+    public Object[] getParameters() {
+        return this.parameters;
     }
 
     public class EventParams {

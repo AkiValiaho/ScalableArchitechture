@@ -7,8 +7,8 @@ import org.apache.camel.impl.DefaultExchange;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by akivv on 18.5.2017.
@@ -24,7 +24,6 @@ public class ExchangeTools {
     }
 
     ObjectInputStream feedOutputStream(Exchange exchange) throws IOException {
-        //TODO Refactor this whole class, it's spaghetti
         byte[] body = (byte[]) exchange.getIn().getBody();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body);
         return new ObjectInputStream(byteArrayInputStream);
@@ -55,7 +54,7 @@ public class ExchangeTools {
     }
 
 
-    public void sendPollResult(HashMap<ServiceEvent, List<String>> eventInterestMap, Exchange exchange, String event) {
+    public void sendPollResult(Map<ServiceEvent, List<String>> eventInterestMap, Exchange exchange, String event) {
         ServiceEventResult serviceEvent = new ConfigurationPollEventResult(eventInterestMap);
         sendExchangeThroughTemplate(exchange, null, serviceEvent, event);
 
