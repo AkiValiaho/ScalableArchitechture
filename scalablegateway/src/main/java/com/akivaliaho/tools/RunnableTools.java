@@ -57,13 +57,13 @@ public class RunnableTools {
     }
 
 
-
     private void waitForRunnableInitialization(List<String> runnables) {
         while (runnableHolder.getStartupSituation() != runnables.size()) {
             log.debug("Runnables not ready yet, number of runnables ready: {}", runnableHolder.getStartupSituation());
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                log.debug("Runnable exception happened");
                 e.printStackTrace();
             }
         }
