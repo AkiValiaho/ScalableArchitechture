@@ -1,6 +1,5 @@
 package com.akivaliaho.amqp;
 
-import com.akivaliaho.ServiceEvent;
 import com.akivaliaho.amqp.eventstrategy.AmqpEventStrategyHandler;
 import com.akivaliaho.config.ConfigEnum;
 import com.akivaliaho.event.AsyncQueue;
@@ -9,15 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * Created by akivv on 18.6.2017.
@@ -27,52 +25,33 @@ import java.util.Map;
 public class AmqpContainerInitialiser {
     private final AsyncQueue asyncQueue;
     private final AmqpEventStrategyHandler amqpEventStrategyHandler;
+    private final AmqpContainerHolder amqpContainerHolder;
     @Getter
     private String serviceNameRoutingKey;
 
     @Autowired
-    public AmqpContainerInitialiser(AmqpEventStrategyHandler amqpEventStrategyHandler, AsyncQueue asyncQueue) {
+    public AmqpContainerInitialiser(AmqpEventStrategyHandler amqpEventStrategyHandler, AsyncQueue asyncQueue, AmqpContainerHolder amqpContainerHolder) {
         this.amqpEventStrategyHandler = amqpEventStrategyHandler;
         this.asyncQueue = asyncQueue;
+        this.amqpContainerHolder = amqpContainerHolder;
     }
 
     public void initAmqpContainer(Map<String, String> messagingConfiguration, RabbitAdmin admin, Queue serviceQueue, Queue toESBQueue, ConnectionFactory connectionFactory) {
         serviceNameRoutingKey = messagingConfiguration.get(ConfigEnum
                 .SERVICEBASENAME);
+        checkPreconditions(admin, serviceQueue, toESBQueue);
         messageContainerInit(connectionFactory, serviceQueue);
     }
 
+    private void checkPreconditions(RabbitAdmin admin, Queue serviceQueue, Queue toESBQueue) {
+        checkArgument(serviceNameRoutingKey != null && !isEmpty(serviceNameRoutingKey));
+        checkNotNull(admin);
+        checkNotNull(serviceQueue);
+        checkNotNull(toESBQueue);
+    }
+
     private void messageContainerInit(ConnectionFactory connectionFactory, Queue serviceQueue) {
-        SimpleMessageListenerContainer container =
-                new SimpleMessageListenerContainer(connectionFactory);
-        Object listener = new Object() {
-            public void handleMessage(byte[] bytes) throws InstantiationException {
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-                try {
-                    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-                    ServiceEvent serviceEvent = (ServiceEvent) objectInputStream.readObject();
-                    handleMessage(serviceEvent);
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            public void handleMessage(ServiceEvent foo) throws InstantiationException {
-                log.error("Got service-event: {}", foo.getEventName());
-                if (foo != null) {
-                    amqpEventStrategyHandler.executeIncomingAmqpCommand(foo);
-                }
-            }
-
-            public void handleMessage(Object object) {
-                //Something is wrong because this is not an event
-                log.error("Message received is malformed: {}", object);
-            }
-        };
-        MessageListenerAdapter adapter = new MessageListenerAdapter(listener);
-        container.setMessageListener(adapter);
-        container.setQueueNames(serviceQueue.getName());
-        container.start();
+        amqpContainerHolder.registerContainer(connectionFactory, serviceQueue);
     }
 
 
