@@ -9,12 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class AmqpEventStrategyHandler {
     private final AmqpEventStrategyHolder amqpEventStrategyholder;
+
     @Autowired
     public AmqpEventStrategyHandler(AmqpEventStrategyHolder amqpEventStrategyHolder) {
         this.amqpEventStrategyholder = amqpEventStrategyHolder;
     }
 
-    public void executeIncomingAmqpCommand(Object foo) throws InstantiationException {
+
+    public void executeIncomingAmqpCommand(Object foo) throws InstantiationException, DelegationFailure {
         Strategy strategy = amqpEventStrategyholder.getStrategy(foo.getClass().getCanonicalName());
         if (strategy != null) {
             strategy.execute(foo);

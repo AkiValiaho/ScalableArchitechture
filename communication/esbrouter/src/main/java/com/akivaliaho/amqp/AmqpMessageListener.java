@@ -2,6 +2,7 @@ package com.akivaliaho.amqp;
 
 import com.akivaliaho.ServiceEvent;
 import com.akivaliaho.amqp.eventstrategy.AmqpEventStrategyHandler;
+import com.akivaliaho.amqp.eventstrategy.DelegationFailure;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,12 @@ public class AmqpMessageListener {
             public void handleMessage(ServiceEvent foo) throws InstantiationException {
                 log.error("Got service-event: {}", foo.getEventName());
                 if (foo != null) {
-                    amqpEventStrategyHandler.executeIncomingAmqpCommand(foo);
+                    try {
+                        amqpEventStrategyHandler.executeIncomingAmqpCommand(foo);
+                    } catch (DelegationFailure e) {
+                        //We can't do anything about this, because rabbitmq will just try to resend the message
+                        throw new RuntimeException(e);
+                    }
                 }
             }
 

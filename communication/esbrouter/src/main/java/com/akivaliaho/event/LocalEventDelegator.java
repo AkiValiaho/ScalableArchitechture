@@ -38,8 +38,12 @@ public class LocalEventDelegator {
         this.resultSendingTool = resultSendingTool;
     }
 
-    public void delegateEvent(ServiceEvent foo) throws InstantiationException {
-        Method method = interestMap.get(foo.getEventName());
+    public void delegateEvent(DomainEvent foo) throws InstantiationException, EventNotInMapException {
+        if (interestMap == null || interestMap.get(foo.getEventName()) == null) {
+            throw new EventNotInMapException(foo.getEventName());
+        }
+        Method method = null;
+        method = interestMap.get(foo.getEventName());
         Object[] parameters = foo.getParameters();
         MethodInvoker.InvocationResult invocationResult = methodInvoker.invokeMethod(method, parameters);
         resultSendingTool.send(invocationResult, foo, parameters);

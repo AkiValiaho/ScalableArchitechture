@@ -1,7 +1,6 @@
 package com.akivaliaho.amqp.eventstrategy;
 
 import com.akivaliaho.ServiceEvent;
-import com.akivaliaho.event.LocalEventDelegator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,21 +9,22 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RequestInterestedPartiesEventStrategy implements Strategy, AMQPExecuting {
-    private final LocalEventDelegator localEventDelegator;
+
+    private final SafeEventDelegator safeEventDelegator;
 
     @Autowired
-    public RequestInterestedPartiesEventStrategy(LocalEventDelegator localEventDelegator) {
-        this.localEventDelegator = localEventDelegator;
+    public RequestInterestedPartiesEventStrategy(SafeEventDelegator safeEventDelegator) {
+        this.safeEventDelegator = safeEventDelegator;
     }
 
     @Override
-    public void execute(ServiceEvent serviceEvent) throws InstantiationException {
-        localEventDelegator.delegateEvent(serviceEvent);
+    public void execute(ServiceEvent serviceEvent) throws InstantiationException, DelegationFailure {
+        safeEventDelegator.safeDelegation(serviceEvent, 10);
     }
 
     @Override
-    public void execute(Object amqpEvent) throws InstantiationException {
-        if (amqpEvent instanceof  ServiceEvent) {
+    public void execute(Object amqpEvent) throws InstantiationException, DelegationFailure {
+        if (amqpEvent instanceof ServiceEvent) {
             execute(((ServiceEvent) amqpEvent));
         }
     }

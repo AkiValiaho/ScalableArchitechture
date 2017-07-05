@@ -22,18 +22,20 @@ public class DefaultServiceEventStrategy implements Strategy<Object>, AMQPExecut
     }
 
     @Override
-    public void execute(Object amqpEvent) throws InstantiationException {
+    public void execute(Object amqpEvent) throws InstantiationException, DelegationFailure {
         if (amqpEvent instanceof ServiceEvent) {
             execute(((ServiceEvent) amqpEvent));
         }
     }
 
     @Override
-    public void execute(ServiceEvent foo) throws InstantiationException {
+    public void execute(ServiceEvent foo) throws InstantiationException, DelegationFailure {
         if (foo.getEventName().toLowerCase().contains("result")) {
             asyncQueue.solveResult(foo);
         } else {
             localEventDelegator.delegateEvent(foo);
+            //It's not a result but an event, delegate it to a method that's interested
+            safeEventDelegator.safeDelegation(foo, 10);
         }
     }
 }

@@ -10,20 +10,24 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConfigurationPollEventResultStrategy implements Strategy, AMQPExecuting {
-    private final LocalEventDelegator localEventDelegator;
+    private final SafeEventDelegator safeEventDelegator;
 
     @Autowired
-    public ConfigurationPollEventResultStrategy(LocalEventDelegator localEventDelegator) {
-        this.localEventDelegator = localEventDelegator;
+    public ConfigurationPollEventResultStrategy(SafeEventDelegator safeEventDelegator) {
+        this.safeEventDelegator = safeEventDelegator;
+    }
+
+    public void execute(ServiceEvent serviceEvent) throws InstantiationException, DelegationFailure {
+        attemptToDelegateEvent(serviceEvent, 10);
+
+    }
+
+    private void attemptToDelegateEvent(ServiceEvent serviceEvent, int maxTries) throws InstantiationException, DelegationFailure {
+        safeEventDelegator.safeDelegation(serviceEvent, maxTries);
     }
 
     @Override
-    public void execute(ServiceEvent serviceEvent) throws InstantiationException {
-        localEventDelegator.delegateEvent((ServiceEvent) serviceEvent);
-    }
-
-    @Override
-    public void execute(Object amqpEvent) throws InstantiationException {
+    public void execute(Object amqpEvent) throws InstantiationException, DelegationFailure {
         if (amqpEvent instanceof ServiceEvent) {
             execute(((ServiceEvent) amqpEvent));
         }
