@@ -2,7 +2,6 @@ package com.akivaliaho.amqp.eventstrategy;
 
 import com.akivaliaho.ServiceEvent;
 import com.akivaliaho.event.AsyncQueue;
-import com.akivaliaho.event.LocalEventDelegator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,12 +12,12 @@ import org.springframework.stereotype.Component;
 public class DefaultServiceEventStrategy implements Strategy<Object>, AMQPExecuting {
 
     private final AsyncQueue asyncQueue;
-    private final LocalEventDelegator localEventDelegator;
+    private final SafeEventDelegator safeEventDelegator;
 
     @Autowired
-    public DefaultServiceEventStrategy(AsyncQueue asyncQueue, LocalEventDelegator localEventDelegator) {
+    public DefaultServiceEventStrategy(AsyncQueue asyncQueue, SafeEventDelegator safeEventDelegator) {
         this.asyncQueue =asyncQueue;
-        this.localEventDelegator = localEventDelegator;
+        this.safeEventDelegator = safeEventDelegator;
     }
 
     @Override
@@ -29,11 +28,10 @@ public class DefaultServiceEventStrategy implements Strategy<Object>, AMQPExecut
     }
 
     @Override
-    public void execute(ServiceEvent foo) throws InstantiationException, DelegationFailure {
+    public void execute(DomainEvent foo) throws InstantiationException, DelegationFailure {
         if (foo.getEventName().toLowerCase().contains("result")) {
             asyncQueue.solveResult(foo);
         } else {
-            localEventDelegator.delegateEvent(foo);
             //It's not a result but an event, delegate it to a method that's interested
             safeEventDelegator.safeDelegation(foo, 10);
         }

@@ -1,6 +1,5 @@
 package com.akivaliaho.amqp.eventstrategy;
 
-import com.akivaliaho.ServiceEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,14 +17,14 @@ public class RequestInterestedPartiesEventStrategy implements Strategy, AMQPExec
     }
 
     @Override
-    public void execute(ServiceEvent serviceEvent) throws InstantiationException, DelegationFailure {
+    public void execute(DomainEvent serviceEvent) throws InstantiationException, DelegationFailure {
         safeEventDelegator.safeDelegation(serviceEvent, 10);
     }
 
     @Override
     public void execute(Object amqpEvent) throws InstantiationException, DelegationFailure {
-        if (amqpEvent instanceof ServiceEvent) {
-            execute(((ServiceEvent) amqpEvent));
+        if (amqpEvent instanceof DomainEvent) {
+            execute((amqpEvent));
         }
     }
 }

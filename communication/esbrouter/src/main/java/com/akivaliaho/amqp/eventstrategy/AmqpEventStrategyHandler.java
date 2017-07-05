@@ -15,7 +15,6 @@ public class AmqpEventStrategyHandler {
         this.amqpEventStrategyholder = amqpEventStrategyHolder;
     }
 
-
     public void executeIncomingAmqpCommand(Object foo) throws InstantiationException, DelegationFailure {
         Strategy strategy = amqpEventStrategyholder.getStrategy(foo.getClass().getCanonicalName());
         if (strategy != null) {
