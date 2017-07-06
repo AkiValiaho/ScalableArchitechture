@@ -1,5 +1,7 @@
 package com.akivaliaho;
 
+import java.util.Optional;
+
 /**
  * Created by akivv on 18.5.2017.
  */
@@ -7,7 +9,7 @@ public class ServiceEventResultBuilder {
     private static ServiceEventResultBuilder builder;
     private String originalEventName;
     private Object[] originalParameters;
-    private ServiceEvent serviceEvent;
+    private DomainEvent serviceEvent;
 
     public static ServiceEventResultBuilder getBuilder() {
         return new ServiceEventResultBuilder();
@@ -23,11 +25,24 @@ public class ServiceEventResultBuilder {
         return this;
     }
 
-    public ServiceEventResult build() {
-        ServiceEventResult serviceEventResult = new ServiceEventResult(serviceEvent);
-        serviceEventResult.setOriginalEventName(originalEventName);
-        serviceEventResult.setOriginalParameters(originalParameters);
-        return serviceEventResult;
+    public DomainEvent build() {
+        Optional<BuilderStrategy> builderStrategy = buildDomainEvent();
+        if (builderStrategy.isPresent()) {
+            DomainEvent serviceEventResult = builderStrategy.get().buildDomainEvent();
+            serviceEventResult.setOriginalEventName(originalEventName);
+            serviceEventResult.setOriginalParameters(originalParameters);
+            return serviceEventResult;
+        }
+        return null;
+    }
+
+    private Optional<BuilderStrategy> buildDomainEvent() {
+        return new DomainEventBuilder()
+                .setDomainEvent(serviceEvent)
+                .isResult()
+                .setOriginalEventName(originalEventName)
+                .setOriginalParameters(originalParameters)
+                .build();
     }
 
     public ServiceEventResultBuilder serviceEvent(ServiceEvent serviceEvent) {

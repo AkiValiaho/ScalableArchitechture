@@ -36,7 +36,7 @@ public class AmqpMessageListener {
             }
 
             public void handleMessage(ServiceEvent foo) throws InstantiationException {
-                log.error("Got service-event: {}", foo.getEventName());
+                log.info("Got service-event: {}", foo.getEventName());
                 if (foo != null) {
                     try {
                         amqpEventStrategyHandler.executeIncomingAmqpCommand(foo);

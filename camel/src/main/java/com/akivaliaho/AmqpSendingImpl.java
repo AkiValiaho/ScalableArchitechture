@@ -23,7 +23,7 @@ public class AmqpSendingImpl implements AmqpSending, ConfigModuleRoutingKeyAware
 
     @Override
     public void sendToInterestedParties(List<String> interestedParties, ServiceEvent serviceEvent, Exchange exchange) {
-        ServiceEventResult serviceEventResult = exchangeParser.parseServiceEventResult(serviceEvent);
+        DomainEvent serviceEventResult = exchangeParser.parseServiceEventResult(serviceEvent);
         exchangeTools.sendToInterestedParties(interestedParties, serviceEvent, serviceEventResult, exchange);
     }
 

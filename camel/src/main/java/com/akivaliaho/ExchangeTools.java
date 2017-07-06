@@ -29,7 +29,7 @@ public class ExchangeTools {
         return new ObjectInputStream(byteArrayInputStream);
     }
 
-    void sendExchangeThroughTemplate(Exchange exchange, ServiceEvent serviceEvent, ServiceEventResult finalServiceEventResult, String event) {
+    void sendExchangeThroughTemplate(Exchange exchange, ServiceEvent serviceEvent, DomainEvent finalServiceEventResult, String event) {
         //Send all the events through the producer template
         try {
             byte[] bytes = getBytes(serviceEvent, finalServiceEventResult);
@@ -39,7 +39,7 @@ public class ExchangeTools {
         }
     }
 
-    private byte[] getBytes(ServiceEvent serviceEvent, ServiceEventResult finalServiceEventResult) throws IOException {
+    private byte[] getBytes(ServiceEvent serviceEvent, DomainEvent finalServiceEventResult) throws IOException {
         if (finalServiceEventResult != null) {
             return byteTools.objectToBytes(finalServiceEventResult);
         } else {
@@ -60,17 +60,17 @@ public class ExchangeTools {
 
     }
 
-    public void sendToInterestedParties(List<String> interestedParties, ServiceEvent serviceEvent, ServiceEventResult serviceEventResult, Exchange exchange) {
+    public void sendToInterestedParties(List<String> interestedParties, ServiceEvent serviceEvent, DomainEvent serviceEventResult, Exchange exchange) {
         //TODO These senders should be part of another class
         sendToParties(exchange, interestedParties, serviceEvent, serviceEventResult);
     }
 
-    private void sendToParties(Exchange exchange, List<String> interestedParties, ServiceEvent serviceEvent, ServiceEventResult serviceEventResult) {
+    private void sendToParties(Exchange exchange, List<String> interestedParties, ServiceEvent serviceEvent, DomainEvent serviceEventResult) {
         if (interestedParties != null) {
-            ServiceEventResult finalServiceEventResult = serviceEventResult;
+            DomainEvent finalServiceEventResult = serviceEventResult;
             interestedParties
                     .forEach(event -> {
-                        sendExchangeThroughTemplate(exchange, serviceEvent, finalServiceEventResult, event);
+                        sendExchangeThroughTemplate(exchange, serviceEvent, serviceEventResult, event);
                     });
         }
     }

@@ -1,6 +1,7 @@
 package com.akivaliaho.event;
 
-import com.akivaliaho.ServiceEventResult;
+import com.akivaliaho.DomainEvent;
+import com.google.common.base.Strings;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -42,12 +44,12 @@ public class AsyncQueue {
     }
 
     public void solveResult(Object foo) {
-        if (foo instanceof ServiceEventResult) {
-            solveResult(((ServiceEventResult) foo));
+        if (foo instanceof DomainEvent) {
+            solveResult(((DomainEvent) foo));
         }
     }
 
-    public void solveResult(ServiceEventResult foo) {
+    public void solveResult(DomainEvent foo) {
         checkNasties(foo);
         log.debug("Got ServiceEvent: {}", foo);
         Object[] originalParameters = foo.getOriginalParameters();
@@ -57,7 +59,7 @@ public class AsyncQueue {
         }
     }
 
-    private void removeFromList(ServiceEventResult foo, Params param) {
+    private void removeFromList(DomainEvent foo, Params param) {
         Map<String, List<DeferredResult<?>>> stringListMap = hitList.get(param);
         List<DeferredResult<?>> deferredResults = stringListMap.get(foo.getOriginalEventName());
         DeferredResult<Object> deferredResult = ((DeferredResult<Object>) deferredResults.get(deferredResults.size() - 1));
@@ -66,8 +68,10 @@ public class AsyncQueue {
         deferredResults.remove(deferredResults.size() - 1);
     }
 
-    private void checkNasties(ServiceEventResult serviceEventResult) {
+    private void checkNasties(DomainEvent serviceEventResult) {
         checkNotNull(serviceEventResult.getOriginalParameters());
+        checkNotNull(serviceEventResult.getOriginalEventName());
+        checkArgument(!Strings.isNullOrEmpty(serviceEventResult.getOriginalEventName()));
     }
 }
 

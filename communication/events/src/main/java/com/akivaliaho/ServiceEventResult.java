@@ -14,7 +14,7 @@ public class ServiceEventResult extends ServiceEvent {
         this.eventName = eventName;
     }
 
-    public ServiceEventResult(ServiceEvent event) {
+    public ServiceEventResult(DomainEvent event) {
         this.id = event.getId();
         this.eventName = event.getEventName();
         this.parameters = event.getParameters();

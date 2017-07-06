@@ -27,12 +27,12 @@ public class ExchangeParser {
 
     }
 
-    public ServiceEventResult parseServiceEventResult(ServiceEvent serviceEvent) {
+    public DomainEvent parseServiceEventResult(ServiceEvent serviceEvent) {
         return parseServiceEventResultIfNeeded(serviceEvent);
     }
 
-    private ServiceEventResult parseServiceEventResultIfNeeded(ServiceEvent serviceEvent) {
-        ServiceEventResult serviceEventResult = null;
+    private DomainEvent parseServiceEventResultIfNeeded(ServiceEvent serviceEvent) {
+        DomainEvent serviceEventResult = null;
         if (serviceEvent.getEventName().toLowerCase().contains("result")) {
             serviceEventResult = ServiceEventResultBuilder.getBuilder()
                     .serviceEvent(serviceEvent)
