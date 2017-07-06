@@ -2,8 +2,9 @@ package com.akivaliaho.event;
 
 import com.akivaliaho.MethodInvoker;
 import com.akivaliaho.ResultSendingTool;
-import com.akivaliaho.ServiceEvent;
 import com.akivaliaho.amqp.EventUtil;
+import com.akivaliaho.DomainEvent;
+import com.akivaliaho.amqp.eventstrategy.EventNotInMapException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

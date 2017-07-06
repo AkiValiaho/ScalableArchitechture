@@ -1,7 +1,6 @@
 package com.akivaliaho.amqp.eventstrategy;
 
 import com.akivaliaho.DomainEvent;
-import com.akivaliaho.event.EventNotInMapException;
 import com.akivaliaho.event.LocalEventDelegator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package com.akivaliaho.amqp.eventstrategy;
 
-import com.akivaliaho.ServiceEvent;
+import com.akivaliaho.DomainEvent;
 import com.akivaliaho.event.AsyncQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,19 +21,14 @@ public class DefaultServiceEventStrategy implements Strategy<Object>, AMQPExecut
     }
 
     @Override
-    public void execute(Object amqpEvent) throws InstantiationException, DelegationFailure {
-        if (amqpEvent instanceof ServiceEvent) {
-            execute(((ServiceEvent) amqpEvent));
-        }
-    }
-
-    @Override
-    public void execute(DomainEvent foo) throws InstantiationException, DelegationFailure {
-        if (foo.getEventName().toLowerCase().contains("result")) {
-            asyncQueue.solveResult(foo);
-        } else {
-            //It's not a result but an event, delegate it to a method that's interested
-            safeEventDelegator.safeDelegation(foo, 10);
+    public void execute(Object foo) throws InstantiationException, DelegationFailure {
+        if (foo instanceof DomainEvent) {
+            if (((DomainEvent) foo).getEventName().toLowerCase().contains("result")) {
+                asyncQueue.solveResult(foo);
+            } else {
+                //It's not a result but an event, delegate it to a method that's interested
+                safeEventDelegator.safeDelegation(((DomainEvent) foo), 10);
+            }
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.akivaliaho.amqp.eventstrategy;
 
 
+import com.akivaliaho.DomainEvent;
+
 /**
  * Created by akivv on 5.7.2017.
  */

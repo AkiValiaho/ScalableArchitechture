@@ -1,11 +1,9 @@
 package com.akivaliaho;
 
-import java.io.Serializable;
-
 /**
  * Created by vagrant on 4/5/17.
  */
-public class ServiceEvent implements Serializable {
+public class ServiceEvent implements DomainEvent{
     private String originalEventName;
     private Object[] originalParameters;
     private Long id;

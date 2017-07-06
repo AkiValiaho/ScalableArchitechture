@@ -1,5 +1,6 @@
 package com.akivaliaho.amqp.eventstrategy;
 
+import com.akivaliaho.DomainEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +16,6 @@ public class ConfigurationPollEventResultStrategy implements Strategy, AMQPExecu
         this.safeEventDelegator = safeEventDelegator;
     }
 
-    public void execute(DomainEvent serviceEvent) throws InstantiationException, DelegationFailure {
-        attemptToDelegateEvent(serviceEvent, 10);
-
-    }
 
     private void attemptToDelegateEvent(DomainEvent domainEvent, int maxTries) throws InstantiationException, DelegationFailure {
         safeEventDelegator.safeDelegation(domainEvent, maxTries);
@@ -27,8 +24,7 @@ public class ConfigurationPollEventResultStrategy implements Strategy, AMQPExecu
     @Override
     public void execute(Object amqpEvent) throws InstantiationException, DelegationFailure {
         if (amqpEvent instanceof DomainEvent) {
-            execute((amqpEvent));
+            attemptToDelegateEvent(((DomainEvent) amqpEvent), 10);
         }
-
     }
 }

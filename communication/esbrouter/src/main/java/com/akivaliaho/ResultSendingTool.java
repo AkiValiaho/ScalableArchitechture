@@ -12,12 +12,12 @@ import java.util.Optional;
 public class ResultSendingTool {
     private EventUtil eventUtil;
 
-    public void send(MethodInvoker.InvocationResult invocationResult, ServiceEvent originalDelegatedEvent, Object[] parameters) {
+    public void send(MethodInvoker.InvocationResult invocationResult, DomainEvent originalDelegatedEvent, Object[] parameters) {
         //TODO Write tests for this class
         sendInvocationOrParsedReturn(originalDelegatedEvent, parameters, invocationResult.getReturnType(), invocationResult.getInvocationResult());
     }
 
-    private void sendInvocationOrParsedReturn(ServiceEvent originalDelegatedEvent, Object[] parameters, Optional<ServiceEvent> returnType, ServiceEvent invoke) {
+    private void sendInvocationOrParsedReturn(DomainEvent originalDelegatedEvent, Object[] parameters, Optional<ServiceEvent> returnType, ServiceEvent invoke) {
         if (sendIfInvokeReturned(originalDelegatedEvent, parameters, invoke)) {
 
         } else {
@@ -25,13 +25,13 @@ public class ResultSendingTool {
         }
     }
 
-    private void sendIfReturnTypeFound(Optional<ServiceEvent> returnType, ServiceEvent originalEvent, Object[] parameters) {
+    private void sendIfReturnTypeFound(Optional<ServiceEvent> returnType, DomainEvent originalEvent, Object[] parameters) {
         if (returnType.isPresent()) {
             sendIfInvokeReturned(originalEvent, parameters, returnType.get());
         }
     }
 
-    private boolean sendIfInvokeReturned(ServiceEvent originalEvent, Object[] parameters, ServiceEvent invocationResult) {
+    private boolean sendIfInvokeReturned(DomainEvent originalEvent, Object[] parameters, ServiceEvent invocationResult) {
         if (invocationResult instanceof ServiceEventResult) {
             ServiceEventResult invoke1 = (ServiceEventResult) invocationResult;
             invoke1.setOriginalParameters(parameters);

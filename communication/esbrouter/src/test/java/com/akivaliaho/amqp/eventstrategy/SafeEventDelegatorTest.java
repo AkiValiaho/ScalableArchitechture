@@ -1,15 +1,12 @@
 package com.akivaliaho.amqp.eventstrategy;
 
 import com.akivaliaho.DomainEvent;
-import com.akivaliaho.event.EventNotInMapException;
 import com.akivaliaho.event.LocalEventDelegator;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by akivv on 4.7.2017.
