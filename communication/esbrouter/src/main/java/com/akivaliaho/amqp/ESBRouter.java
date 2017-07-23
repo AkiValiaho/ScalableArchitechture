@@ -1,6 +1,7 @@
 package com.akivaliaho.amqp;
 
 import com.akivaliaho.ServiceEvent;
+import com.akivaliaho.ServiceEventDto;
 import com.akivaliaho.config.ConfigEnum;
 import com.akivaliaho.config.ConfigurationHolder;
 import com.akivaliaho.event.InterestEvent;
@@ -62,7 +63,8 @@ public class ESBRouter {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(bos);
-            objectOutputStream.writeObject(event);
+            objectOutputStream.writeObject(new ServiceEventDto(event.getOriginalEventName(), event.getOriginalParameters(), event.getId(),
+                    event.getParameters(), event.getEventName()));
             MessageProperties messageProperties = new MessageProperties();
             messageProperties.setHeader("serviceName", amqpConfigurator.getServiceName());
             Message message = new Message(bos.toByteArray(), messageProperties);
