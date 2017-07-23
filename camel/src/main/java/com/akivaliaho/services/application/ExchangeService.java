@@ -1,8 +1,8 @@
 package com.akivaliaho.services.application;
 
 import com.akivaliaho.ByteTools;
+import com.akivaliaho.domain.InterestHolder;
 import com.akivaliaho.domain.ServiceEvent;
-import com.akivaliaho.services.domain.ServiceEventSendingTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -14,18 +14,19 @@ import org.apache.camel.Processor;
 @Slf4j
 public class ExchangeService implements Processor {
 
-    private final ServiceEventSendingTemplate serviceEventSendingTemplate;
     private final ByteTools byteTools;
+    private final AmqpConnection amqpConnection;
+    private final InterestHolder interestHolder;
 
-    public ExchangeService(ServiceEventSendingTemplate serviceEventSendingTemplate, ByteTools byteTools) {
-        this.serviceEventSendingTemplate = serviceEventSendingTemplate;
+    public ExchangeService(AmqpConnection amqpConnection, ByteTools byteTools, InterestHolder interestHolder) {
         this.byteTools = byteTools;
+        this.amqpConnection = amqpConnection;
+        this.interestHolder = interestHolder;
     }
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        ServiceEvent serviceEvent = new ServiceEvent(exchange, byteTools);
         //Default operation is to send exchange with the new ServiceEvent converted to a DtO embedded through amqp
-        serviceEventSendingTemplate.sendServiceEvent(exchange, serviceEvent);
+        new ServiceEvent(exchange, byteTools, amqpConnection, interestHolder);
     }
 }

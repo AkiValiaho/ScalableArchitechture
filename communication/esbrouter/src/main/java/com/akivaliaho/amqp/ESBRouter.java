@@ -49,7 +49,7 @@ public class ESBRouter {
     public void informAboutInterests() {
         InterestEvent event = new InterestEvent(configurationHolder.getInterests()
                 .stream()
-                .map(s -> new ServiceEvent(s))
+                .map(s -> new ServiceEventDto("", null, null, null, s))
                 .collect(Collectors.toList()), configurationHolder.getMessagingConfiguration().get(ConfigEnum.MQ_FROM_ESB_ESCHANGE));
         localEventDelegator.pluginInterests(configurationHolder.getInterestMap());
         routeEvent(new ServiceEvent(event));

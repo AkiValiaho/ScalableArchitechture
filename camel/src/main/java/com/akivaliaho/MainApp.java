@@ -1,9 +1,9 @@
 package com.akivaliaho;
 
+import com.akivaliaho.domain.InterestHolder;
 import com.akivaliaho.services.application.AmqpConnection;
 import com.akivaliaho.services.application.ExchangeService;
 import com.akivaliaho.services.application.FromMQRouteBuilder;
-import com.akivaliaho.services.domain.ServiceEventSendingTemplate;
 import org.apache.camel.main.Main;
 
 /**
@@ -18,8 +18,8 @@ public class MainApp {
         Main main = new Main();
         AmqpConnection amqpConnection = new AmqpConnection();
         ByteTools byteTools = new ByteTools();
-        ServiceEventSendingTemplate serviceEventSendingTemplate = new ServiceEventSendingTemplate(amqpConnection);
-        ExchangeService exchangeService = new ExchangeService(serviceEventSendingTemplate, byteTools);
+        InterestHolder interestHolder = new InterestHolder();
+        ExchangeService exchangeService = new ExchangeService(amqpConnection, byteTools, interestHolder);
         FromMQRouteBuilder routeBuilder = new FromMQRouteBuilder(exchangeService);
         main.addRouteBuilder(routeBuilder);
         main.run(args);
